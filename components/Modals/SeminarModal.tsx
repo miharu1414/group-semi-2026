@@ -290,8 +290,7 @@ export default function SeminarModal({
           )}
 
           <button
-            type="submit"
-            form="seminar-form"
+            type="button"
             disabled={saving || !form.date}
             onClick={handleSubmit}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"

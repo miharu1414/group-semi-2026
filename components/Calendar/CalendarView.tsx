@@ -132,9 +132,9 @@ export default function CalendarView({
                         ? 'bg-indigo-600 text-white font-bold'
                         : !isCurrentMonth
                         ? 'text-gray-300'
-                        : dayOfWeek === 6
-                        ? 'text-red-400'
                         : dayOfWeek === 0
+                        ? 'text-red-400'
+                        : dayOfWeek === 6
                         ? 'text-blue-400'
                         : 'text-gray-700'
                       }

@@ -1,12 +1,9 @@
 /** @type {import('next').NextConfig} */
-const { setupDevPlatform } = require('@cloudflare/next-on-pages/next-dev');
-
-const nextConfig = {
-  // Required for @cloudflare/next-on-pages
-};
+const nextConfig = {};
 
 if (process.env.NODE_ENV === 'development') {
   (async () => {
+    const { setupDevPlatform } = await import('@cloudflare/next-on-pages/next-dev');
     await setupDevPlatform();
   })();
 }

@@ -15,6 +15,7 @@ export default function CalendarApp() {
   const [seminars, setSeminars] = useState<Seminar[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
 
   // Modal state
   const [seminarModalOpen, setSeminarModalOpen] = useState(false);
@@ -27,12 +28,14 @@ export default function CalendarApp() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    setFetchError(false);
     try {
       const [sems, mems] = await Promise.all([getSeminars(monthKey), getMembers()]);
       setSeminars(sems);
       setMembers(mems);
     } catch (e) {
       console.error(e);
+      setFetchError(true);
     } finally {
       setLoading(false);
     }
@@ -153,6 +156,19 @@ export default function CalendarApp() {
           <span className="hidden sm:inline">メンバー管理</span>
         </button>
       </header>
+
+      {/* ── Fetch Error Banner ── */}
+      {fetchError && (
+        <div className="bg-red-50 border-b border-red-200 px-4 py-2 flex items-center justify-between">
+          <span className="text-sm text-red-700">データの読み込みに失敗しました。</span>
+          <button
+            onClick={fetchData}
+            className="text-sm text-red-700 font-semibold underline hover:no-underline"
+          >
+            再試行
+          </button>
+        </div>
+      )}
 
       {/* ── Calendar ── */}
       <main className="flex-1 overflow-hidden">
