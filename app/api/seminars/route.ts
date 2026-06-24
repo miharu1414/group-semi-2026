@@ -1,58 +1,63 @@
-import { getRequestContext } from '@cloudflare/next-on-pages';
-import { NextRequest, NextResponse } from 'next/server';
-import { Seminar } from '@/lib/types';
+﻿import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export const runtime = 'edge';
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
-  try {
-    const { env } = getRequestContext() as { env: CloudflareEnv };
-    const { searchParams } = new URL(request.url);
-    const month = searchParams.get('month'); // e.g. "2026-07"
+export async function GET(request: Request) {
+  const { env } = getRequestContext() as { env: CloudflareEnv };
+  const { searchParams } = new URL(request.url);
+  const month = searchParams.get('month'); // yyyy-MM
 
-    const stmt = month
-      ? env.DB.prepare('SELECT * FROM seminars WHERE date LIKE ? ORDER BY date ASC').bind(`${month}%`)
-      : env.DB.prepare('SELECT * FROM seminars ORDER BY date ASC');
+  const result = month
+    ? await env.DB.prepare(
+        'SELECT * FROM seminars WHERE date LIKE ? ORDER BY date ASC'
+      )
+        .bind(`${month}-%`)
+        .all()
+    : await env.DB.prepare('SELECT * FROM seminars ORDER BY date ASC').all();
 
-    const result = await stmt.all<Seminar>();
-    return NextResponse.json(result.results);
-  } catch (e) {
-    console.error(e);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
-  }
+  return Response.json(result.results);
 }
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
-  try {
-    const { env } = getRequestContext() as { env: CloudflareEnv };
-    const body = await request.json() as Partial<Seminar>;
+export async function POST(request: Request) {
+  const { env } = getRequestContext() as { env: CloudflareEnv };
+  const body = (await request.json()) as {
+    date: string;
+    type: string;
+    title?: string;
+    assignee_a?: string;
+    assignee_b?: string;
+    assignee_c?: string;
+    notes?: string;
+  };
 
-    if (!body.date || !body.type) {
-      return NextResponse.json({ error: 'date and type are required' }, { status: 400 });
-    }
-
-    const id = crypto.randomUUID();
-
-    await env.DB.prepare(
-      `INSERT INTO seminars (id, date, type, title, assignee_a, assignee_b, assignee_c, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-    )
-      .bind(
-        id,
-        body.date,
-        body.type,
-        body.title ?? '',
-        body.assignee_a ?? '',
-        body.assignee_b ?? '',
-        body.assignee_c ?? '',
-        body.notes ?? ''
-      )
-      .run();
-
-    const seminar = await env.DB.prepare('SELECT * FROM seminars WHERE id = ?').bind(id).first<Seminar>();
-    return NextResponse.json(seminar, { status: 201 });
-  } catch (e) {
-    console.error(e);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  if (!body.date || !body.type) {
+    return Response.json({ error: 'date and type are required' }, { status: 400 });
   }
+
+  const id = crypto.randomUUID();
+  const now = new Date().toISOString();
+
+  await env.DB.prepare(
+    `INSERT INTO seminars (id, date, type, title, assignee_a, assignee_b, assignee_c, notes, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  )
+    .bind(
+      id,
+      body.date,
+      body.type,
+      body.title ?? '',
+      body.assignee_a ?? '',
+      body.assignee_b ?? '',
+      body.assignee_c ?? '',
+      body.notes ?? '',
+      now,
+      now
+    )
+    .run();
+
+  const seminar = await env.DB.prepare('SELECT * FROM seminars WHERE id = ?')
+    .bind(id)
+    .first();
+
+  return Response.json(seminar, { status: 201 });
 }

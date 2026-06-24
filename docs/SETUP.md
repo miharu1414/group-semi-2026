@@ -1,28 +1,26 @@
-# セットアップ手順
+# 開発環境セットアップ手順
 
-他のPCで開発を始める場合や、初回セットアップの手順書です。
-
----
+> **整合性**: 手順を変更した場合、`docs/cloudflare-setup.md` と `CLAUDE.md#よく使うコマンド` も確認してください。
 
 ## 前提条件
 
-- Node.js 18以上
-- npm 9以上
-- Git
-- Cloudflareアカウント（[cloudflare-setup.md](cloudflare-setup.md) 参照）
+- Node.js 20 以上
+- npm 10 以上
+- Cloudflare アカウント（無料プランで可）
+- `wrangler` CLI（手順内でインストール）
 
 ---
 
-## 1. リポジトリクローン
+## 手順 1 — リポジトリのクローン
 
 ```bash
-git clone https://github.com/<your-org>/group-semi-2026.git
+git clone https://github.com/miharu1414/group-semi-2026.git
 cd group-semi-2026
 ```
 
 ---
 
-## 2. 依存関係インストール
+## 手順 2 — 依存パッケージのインストール
 
 ```bash
 npm install
@@ -30,133 +28,91 @@ npm install
 
 ---
 
-## 3. 環境変数の設定
-
-`.env.example` をコピーして `.env.local` を作成します。
+## 手順 3 — 環境変数の設定
 
 ```bash
-# Windows (PowerShell)
-Copy-Item .env.example .env.local
-
-# Mac/Linux
 cp .env.example .env.local
 ```
 
-`.env.local` を開き、値を入力します：
+`.env.local` の中身（現時点では空で可。D1はwrangler経由でバインドされるため）:
 
-```env
-CLOUDFLARE_API_TOKEN=<Cloudflare APIトークン>
-CLOUDFLARE_ACCOUNT_ID=<CloudflareアカウントID>
 ```
-
-> **ブラウザログインで済ませる場合** (推奨・ローカル開発時):
-> ```bash
-> npx wrangler login
-> ```
-> この場合、`.env.local` の設定は不要です。
+# Cloudflare D1のバインディングはwrangler.tomlで設定するため、
+# ローカル開発時は .env.local は不要です。
+```
 
 ---
 
-## 4. Cloudflare D1 データベース設定
+## 手順 4 — Cloudflare D1 データベースの作成
 
-### 4-a. D1データベースが未作成の場合（初回のみ）
-
-詳細は [cloudflare-setup.md](cloudflare-setup.md) を参照してください。
+> Cloudflareアカウントへのログインが必要です。
 
 ```bash
-npx wrangler d1 create group-semi-2026-db
+# wranglerにログイン
+npx wrangler login
+
+# D1データベースを作成（初回のみ）
+npm run db:create
+# → 出力された database_id をコピーする
 ```
 
-出力例：
-```
-✅ Successfully created DB 'group-semi-2026-db'
+`wrangler.toml` の `database_id` を更新:
 
-[[d1_databases]]
-binding = "DB"
-database_name = "group-semi-2026-db"
-database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-```
-
-`database_id` の値を `wrangler.toml` に貼り付けます：
 ```toml
 [[d1_databases]]
 binding = "DB"
 database_name = "group-semi-2026-db"
-database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  # ← ここを更新
+database_id = "ここに貼り付ける"  # ← 上で取得したID
+migrations_dir = "migrations"
 ```
-
-### 4-b. D1データベースが既に存在する場合（2台目以降のPC）
-
-チームメンバーから `database_id` を共有してもらい、`wrangler.toml` に記入します。
-既に `wrangler.toml` にIDが記入されてコミットされていれば、そのまま使用できます。
 
 ---
 
-## 5. DBマイグレーション実行
-
-### ローカル開発用（miniflare環境）
+## 手順 5 — DBマイグレーション（ローカル）
 
 ```bash
 npm run db:migrate
-```
-
-`.wrangler/state/v3/d1/` にローカルSQLiteが作成されます。
-
-### 本番リモート（初回デプロイ時のみ）
-
-```bash
-npm run db:migrate:remote
+# → migrations/0001_schema.sql が実行され、テーブルとサンプルデータが作成される
 ```
 
 ---
 
-## 6. ローカル開発サーバー起動
+## 手順 6 — 開発サーバー起動
 
-### 通常開発（UIの確認のみ）
+### 通常の Next.js 開発サーバー（高速、D1なし）
+
 ```bash
 npm run dev
 # → http://localhost:3000
 ```
-> **注意**: このモードではAPIが動作しません。UIの見た目確認のみ。
 
-### API込みフルプレビュー（推奨）
+> D1なしで起動するためAPIは動作しません。UIの確認のみ可能。
+
+### Cloudflare Workers互換プレビュー（D1バインディングあり）
+
 ```bash
 npm run preview
 # → http://localhost:8788
 ```
-Cloudflare Workers + D1ローカルバインディングが動作します。
-初回は少し時間がかかります。
+
+> APIとD1が動作します。本番に最も近い環境です。
 
 ---
 
-## 7. デプロイ
+## 手順 7 — 本番デプロイ
 
-```bash
-npm run deploy
-```
-
-または GitHub連携による自動デプロイ（[cloudflare-setup.md](cloudflare-setup.md) の手順7参照）。
+→ `docs/cloudflare-setup.md` を参照
 
 ---
 
-## トラブルシューティング
+## よく使うコマンド
 
-### `wrangler login` でブラウザが開かない
 ```bash
-npx wrangler login --no-browser
-```
-表示されるURLを手動でブラウザに貼り付けてください。
-
-### D1マイグレーションエラー
-```bash
-# ローカルのD1状態をリセット
-rm -rf .wrangler/state
-npm run db:migrate
-```
-
-### `npm run preview` でビルドエラー
-```bash
-# キャッシュクリア
-rm -rf .next .vercel
-npm run preview
+npm run dev            # 通常開発サーバー（localhost:3000）
+npm run preview        # Cloudflare互換ローカルプレビュー（localhost:8788）
+npm run deploy         # Cloudflare Pagesへデプロイ
+npm run db:migrate     # ローカルDBにマイグレーション適用
+npm run db:migrate:remote  # 本番DBにマイグレーション適用
+npm run lint           # ESLintチェック
+npx tsc --noEmit       # 型チェック
 ```

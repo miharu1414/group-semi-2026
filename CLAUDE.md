@@ -167,11 +167,26 @@ npm run lint
 
 ---
 
-## ドキュメント
+## 整合性ルール
 
-作業前に必ず参照：
-- [要件定義](docs/REQUIREMENTS.md)
-- [システム構成](docs/ARCHITECTURE.md)
-- [進捗管理](docs/PROGRESS.md)
-- [セットアップ手順](docs/SETUP.md)
-- [Cloudflare手順書](docs/cloudflare-setup.md)
+> このプロジェクトは Claude・Cursor・Copilot・Gemini 等の複数AIが作業します。  
+> **`docs/instructions/`** が全AI共通のルール群です。作業前に必ず読んでください。  
+> 変更後は `docs/instructions/AI_WORKFLOW.md` のチェックリストを実行してください。
+
+---
+
+## ドキュメント（この順で読むこと）
+
+| ファイル | 役割 |
+|---|---|
+| [docs/instructions/INDEX.md](docs/instructions/INDEX.md) | **最初にここ** — 全体マップ |
+| [docs/instructions/DATA_MODEL.md](docs/instructions/DATA_MODEL.md) | ゼミ種別・型定義（SSOT） |
+| [docs/instructions/SYSTEM_DESIGN.md](docs/instructions/SYSTEM_DESIGN.md) | 設計思想・Edge制約 |
+| [docs/instructions/CODING_STANDARDS.md](docs/instructions/CODING_STANDARDS.md) | コーディング規約 |
+| [docs/instructions/DESIGN_RULES.md](docs/instructions/DESIGN_RULES.md) | UIデザインルール |
+| [docs/instructions/AI_WORKFLOW.md](docs/instructions/AI_WORKFLOW.md) | 整合性チェックリスト |
+| [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | 要件定義 |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | システム構成・API一覧 |
+| [docs/SETUP.md](docs/SETUP.md) | セットアップ手順 |
+| [docs/cloudflare-setup.md](docs/cloudflare-setup.md) | Cloudflareデプロイ手順 |
+| [docs/PROGRESS.md](docs/PROGRESS.md) | 進捗管理 |

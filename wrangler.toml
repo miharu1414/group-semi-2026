@@ -16,5 +16,5 @@ pages_build_output_dir = ".vercel/output/static"
 [[d1_databases]]
 binding = "DB"
 database_name = "group-semi-2026-db"
-database_id = "REPLACE_WITH_YOUR_DATABASE_ID"
+database_id = "2ea4d6b4-82b0-4c1c-b201-374ab0bed5d3"
 migrations_dir = "migrations"

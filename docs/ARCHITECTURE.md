@@ -1,156 +1,103 @@
-# システム構成
+# システム構成書
 
-最終更新: 2026-06-24
+> **整合性**: APIエンドポイントやDB構成を変更した場合、`INSTRUCTIONS.md` のチェックリストを実行してください。
 
----
-
-## 1. アーキテクチャ概要
+## 全体構成図
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                   ブラウザ (Client)                   │
-│  Next.js App (React)  ←→  /api/* (fetch)            │
-└──────────────────┬──────────────────────────────────┘
-                   │ HTTPS
-┌──────────────────▼──────────────────────────────────┐
-│              Cloudflare Pages (Edge)                 │
-│  ┌────────────────────┐  ┌──────────────────────┐   │
-│  │  Static Assets     │  │  API Routes          │   │
-│  │  (HTML/CSS/JS)     │  │  (Edge Runtime)      │   │
-│  └────────────────────┘  └──────────┬───────────┘   │
-│                                     │ D1 Binding     │
-│                          ┌──────────▼───────────┐   │
-│                          │  Cloudflare D1       │   │
-│                          │  (SQLite互換DB)       │   │
-│                          └──────────────────────┘   │
-└─────────────────────────────────────────────────────┘
-```
-
----
-
-## 2. 技術スタック詳細
-
-### フロントエンド
-- **Next.js 14** (App Router) — React Server Components + Client Components
-- **TypeScript** — 型安全な開発
-- **Tailwind CSS** — ユーティリティファーストCSS
-- **lucide-react** — アイコンライブラリ
-- **date-fns / date-fns-tz** — 日付操作
-
-### バックエンド
-- **Next.js API Routes** (`app/api/`) — RESTful API
-- **Edge Runtime** — Cloudflare Workers環境で動作
-- **Cloudflare D1** — SQLite互換のサーバーレスDB
-
-### インフラ
-- **Cloudflare Pages** — ホスティング・CDN
-- **@cloudflare/next-on-pages** — Next.js → Cloudflare Pages変換ツール
-- **wrangler** — Cloudflare CLIツール
-
----
-
-## 3. ディレクトリ構成
-
-```
-group-semi-2026/
-├── app/                        # Next.js App Router
-│   ├── api/
-│   │   ├── seminars/
-│   │   │   ├── route.ts        # GET（一覧）, POST（作成）
-│   │   │   └── [id]/
-│   │   │       └── route.ts    # GET（詳細）, PUT（更新）, DELETE（削除）
-│   │   └── members/
-│   │       ├── route.ts        # GET（一覧）, POST（作成）
-│   │       └── [id]/
-│   │           └── route.ts    # PUT（更新）, DELETE（削除）
-│   ├── globals.css
-│   ├── layout.tsx
-│   └── page.tsx
-│
-├── components/
-│   ├── CalendarApp.tsx         # ルートコンポーネント（状態管理）
-│   ├── Calendar/
-│   │   ├── CalendarView.tsx    # カレンダーグリッド（月表示）
-│   │   └── SeminarCard.tsx     # 予定カード（種別色分け）
-│   └── Modals/
-│       ├── SeminarModal.tsx    # ゼミ作成・編集モーダル
-│       └── MembersModal.tsx    # メンバー管理モーダル
-│
-├── lib/
-│   ├── types.ts                # 型定義・SEMINAR_TYPES定数
-│   └── api.ts                  # クライアント側APIラッパー
-│
-├── migrations/
-│   └── 0001_schema.sql         # テーブル定義 + 初期データ
-│
-├── docs/                       # ドキュメント
-│   ├── REQUIREMENTS.md
-│   ├── ARCHITECTURE.md         # このファイル
-│   ├── PROGRESS.md
-│   ├── SETUP.md
-│   └── cloudflare-setup.md
-│
-├── CLAUDE.md                   # AI開発用ガイド
-├── .env.example                # 環境変数テンプレート
-├── cloudflare-env.d.ts         # D1型定義
-├── wrangler.toml               # Cloudflare設定
-├── next.config.js
-├── tailwind.config.js
-└── tsconfig.json
-```
-
----
-
-## 4. API設計
-
-### ゼミ予定 API
-
-| メソッド | エンドポイント | 説明 | パラメータ |
-|--------|-------------|------|----------|
-| GET | `/api/seminars` | 一覧取得 | `?month=YYYY-MM`（任意）|
-| POST | `/api/seminars` | 新規作成 | Body: SeminarFormData |
-| GET | `/api/seminars/:id` | 詳細取得 | - |
-| PUT | `/api/seminars/:id` | 更新 | Body: Partial\<SeminarFormData\> |
-| DELETE | `/api/seminars/:id` | 削除 | - |
-
-### メンバー API
-
-| メソッド | エンドポイント | 説明 | パラメータ |
-|--------|-------------|------|----------|
-| GET | `/api/members` | 一覧取得 | - |
-| POST | `/api/members` | 新規作成 | Body: MemberFormData |
-| PUT | `/api/members/:id` | 更新 | Body: Partial\<MemberFormData\> |
-| DELETE | `/api/members/:id` | 削除 | - |
-
----
-
-## 5. データフロー
-
-```
-ユーザー操作
+ブラウザ (React/Next.js)
     │
+    │  HTTP (fetch)
     ▼
-CalendarApp.tsx（状態管理）
-    │ useEffect / イベントハンドラ
+Cloudflare Pages (Edge Runtime)
+    │  Next.js App Router
+    ├── /                          → app/page.tsx → CalendarApp
+    └── /api/seminars              → app/api/seminars/route.ts
+        /api/seminars/:id          → app/api/seminars/[id]/route.ts
+        /api/members               → app/api/members/route.ts
+        /api/members/:id           → app/api/members/[id]/route.ts
+    │
+    │  D1 binding (env.DB)
     ▼
-lib/api.ts（fetch ラッパー）
-    │ HTTP Request
-    ▼
-app/api/*/route.ts（Edge Runtime）
-    │ D1 Binding
-    ▼
-Cloudflare D1（SQLite）
+Cloudflare D1 (SQLite)
+    ├── seminars
+    └── members
 ```
 
 ---
 
-## 6. 環境構成
+## API エンドポイント一覧
 
-| 環境 | 説明 | DBアクセス |
-|------|------|----------|
-| ローカル開発 (`npm run dev`) | Next.js開発サーバー | D1バインディング不可（ローカルSQLiteなし）|
-| ローカルプレビュー (`npm run preview`) | Wrangler + miniflare | ローカルSQLite（`.wrangler/`）|
-| 本番 (`npm run deploy`) | Cloudflare Pages | Cloudflare D1（リモート）|
+### ゼミ予定 `/api/seminars`
 
-> **注意**: `npm run dev` では `getRequestContext()` が動作しないため、APIは404になります。
-> APIのテストには `npm run preview` を使用してください。
+| メソッド | パス | 説明 | クエリ/ボディ |
+|---|---|---|---|
+| GET | `/api/seminars` | 全ゼミ取得（月絞り込み可） | `?month=yyyy-MM` |
+| POST | `/api/seminars` | ゼミ新規作成 | `{ date, type, title?, assignee_a?, assignee_b?, assignee_c?, notes? }` |
+| GET | `/api/seminars/:id` | 単件取得 | — |
+| PUT | `/api/seminars/:id` | 更新（部分更新可） | 同上 |
+| DELETE | `/api/seminars/:id` | 削除 | — |
+
+### メンバー `/api/members`
+
+| メソッド | パス | 説明 | ボディ |
+|---|---|---|---|
+| GET | `/api/members` | 全メンバー取得（order_num順） | — |
+| POST | `/api/members` | メンバー新規作成 | `{ name, role?, order_num? }` |
+| GET | `/api/members/:id` | 単件取得 | — |
+| PUT | `/api/members/:id` | 更新 | `{ name?, role?, order_num? }` |
+| DELETE | `/api/members/:id` | 削除 | — |
+
+---
+
+## DBスキーマ
+
+→ `migrations/0001_schema.sql` が正。`lib/types.ts` と整合性を保つこと。
+
+### seminars
+
+| 列 | 型 | 制約 |
+|---|---|---|
+| id | TEXT | PK, UUID |
+| date | TEXT | NOT NULL, YYYY-MM-DD |
+| type | TEXT | NOT NULL, CHECK(`rinudoku`/`zentai`/`kenkyu`) |
+| title | TEXT | DEFAULT '' |
+| assignee_a | TEXT | DEFAULT '' |
+| assignee_b | TEXT | DEFAULT '' |
+| assignee_c | TEXT | DEFAULT '' |
+| notes | TEXT | DEFAULT '' |
+| created_at | DATETIME | NOT NULL |
+| updated_at | DATETIME | NOT NULL |
+
+### members
+
+| 列 | 型 | 制約 |
+|---|---|---|
+| id | TEXT | PK, UUID |
+| name | TEXT | NOT NULL |
+| role | TEXT | DEFAULT '' |
+| order_num | INTEGER | DEFAULT 0 |
+| created_at | DATETIME | NOT NULL |
+
+---
+
+## コンポーネント構成
+
+```
+app/page.tsx (Edge)
+└── components/CalendarApp.tsx ('use client' — 状態管理ハブ)
+    ├── components/Calendar/CalendarView.tsx  (カレンダーグリッド)
+    │   └── components/Calendar/SeminarCard.tsx  (1予定のカード)
+    └── components/Modals/
+        ├── SeminarModal.tsx  (予定追加・編集)
+        └── MembersModal.tsx  (メンバー管理)
+```
+
+---
+
+## データフロー
+
+1. `CalendarApp` が月変更のたびに `/api/seminars?month=yyyy-MM` と `/api/members` をfetch
+2. `CalendarView` はpropsとして受け取り表示のみ担当
+3. モーダルでの保存・削除は `CalendarApp` のハンドラが担当し、楽観的UIで即時反映
+4. エラー時はモーダル内にエラーメッセージを表示

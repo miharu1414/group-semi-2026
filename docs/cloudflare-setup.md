@@ -1,158 +1,161 @@
-# Cloudflare 手動セットアップ手順書
+# Cloudflare デプロイ手順書
 
-このドキュメントはCloudflareダッシュボードで手動で行う作業をまとめた手順書です。
-コマンド操作は [SETUP.md](SETUP.md) を参照してください。
-
----
-
-## 事前準備
-
-### 必要なもの
-- Cloudflareアカウント（無料プランでOK）
-- GitHubアカウント
-- このリポジトリへのアクセス権
+> **整合性**: この手順を変更した場合、`docs/SETUP.md` と `wrangler.toml` も確認してください。
 
 ---
 
-## 手順 1: Cloudflareアカウント作成
+## 前提
 
-1. [https://cloudflare.com](https://cloudflare.com) にアクセス
-2. 「Sign Up」をクリック
-3. メールアドレスとパスワードを入力して登録
-4. メール認証を完了する
-
----
-
-## 手順 2: APIトークン作成
-
-CLIツール（wrangler）からCloudflareを操作するためのトークンを作成します。
-
-1. Cloudflareダッシュボードにログイン
-2. 右上のアバター → **「My Profile」** をクリック
-3. 左メニューの **「API Tokens」** をクリック
-4. **「Create Token」** ボタンをクリック
-5. **「Edit Cloudflare Workers」** テンプレートを選択
-6. 以下の権限を確認・追加:
-   - `Cloudflare Pages:Edit`
-   - `D1:Edit`
-   - `Workers Scripts:Edit`
-7. **「Continue to Summary」** → **「Create Token」**
-8. 表示されたトークンをコピーして `.env.local` の `CLOUDFLARE_API_TOKEN` に設定
-
-> **注意**: トークンは作成直後しか表示されません。必ずコピーしてください。
+- Cloudflare アカウント作成済み
+- `wrangler login` 済み（`docs/SETUP.md 手順4` 参照）
+- `wrangler.toml` の `database_id` 設定済み
 
 ---
 
-## 手順 3: アカウントIDの確認
+## 初回デプロイ手順
 
-1. Cloudflareダッシュボードのホームページ（Workers & Pages）を開く
-2. 右側サイドバーに **「Account ID」** が表示されている
-3. コピーして `.env.local` の `CLOUDFLARE_ACCOUNT_ID` に設定
-
----
-
-## 手順 4: D1 データベース作成（CLIで実行）
-
-ダッシュボードからも作成できますが、CLIが推奨です。
+### 1. D1データベースを作成する
 
 ```bash
+# ローカルで実行
 npx wrangler d1 create group-semi-2026-db
 ```
 
-出力された `database_id` を `wrangler.toml` に貼り付けてください。
+出力例:
+```
+✅ Successfully created DB 'group-semi-2026-db'
 
-### ダッシュボードで確認する場合
+[[d1_databases]]
+binding = "DB"
+database_name = "group-semi-2026-db"
+database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+```
 
-1. Cloudflareダッシュボード → 左メニュー **「Storage & Databases」** → **「D1 SQL Database」**
-2. 作成したデータベース **「group-semi-2026-db」** をクリック
-3. **「Settings」** タブで `database_id` を確認
-
----
-
-## 手順 5: Cloudflare Pages プロジェクト作成（GitHubの自動デプロイ設定）
-
-### 5-1. Pages プロジェクト作成
-
-1. Cloudflareダッシュボード → **「Workers & Pages」**
-2. **「Create application」** → **「Pages」** タブ → **「Connect to Git」**
-3. GitHubアカウントを連携
-4. リポジトリ **「group-semi-2026」** を選択
-5. **「Begin setup」** をクリック
-
-### 5-2. ビルド設定
-
-| 設定項目 | 値 |
-|---------|---|
-| Production branch | `main` |
-| Framework preset | `Next.js` |
-| Build command | `npx @cloudflare/next-on-pages@1` |
-| Build output directory | `.vercel/output/static` |
-
-### 5-3. 環境変数設定（Pagesビルド用）
-
-「Environment variables (advanced)」を展開して以下を追加:
-
-| 変数名 | 値 | 環境 |
-|-------|---|------|
-| `NODE_VERSION` | `18` | Production & Preview |
-
-6. **「Save and Deploy」** をクリック
+`wrangler.toml` の `database_id` を上記の値に更新してください。
 
 ---
 
-## 手順 6: D1バインディングをPagesプロジェクトに追加
-
-> **重要**: この手順を完了しないとAPIが動作しません。
-
-1. Cloudflareダッシュボード → **「Workers & Pages」** → 作成した `group-semi-2026` プロジェクトをクリック
-2. **「Settings」** タブ → **「Bindings」** をクリック
-3. **「Add」** → **「D1 database」** を選択
-4. 以下を入力:
-   - **Variable name**: `DB`（大文字・完全一致）
-   - **D1 database**: `group-semi-2026-db` を選択
-5. **「Save」** をクリック
-6. 設定反映のため、**「Deployments」** タブから最新のデプロイを **「Retry deployment」**
-
----
-
-## 手順 7: 本番DBマイグレーション実行
-
-ローカルのターミナルで実行:
+### 2. 本番DBにマイグレーションを適用する
 
 ```bash
 npm run db:migrate:remote
+# → migrations/0001_schema.sql が本番D1に適用される
 ```
 
-これで本番のD1にテーブルと初期データが作成されます。
+---
+
+### 3. Cloudflare Pages プロジェクトを作成する（初回のみ）
+
+Cloudflare ダッシュボード（https://dash.cloudflare.com）で:
+
+1. **Workers & Pages** → **Create application** → **Pages** → **Connect to Git**
+2. GitHubリポジトリ `group-semi-2026` を選択
+3. ビルド設定:
+   - **Framework preset**: `Next.js`（自動検出されない場合は手動選択）
+   - **Build command**: `npm run pages:build`
+   - **Build output directory**: `.vercel/output/static`
+4. **Environment variables**: 現時点では不要
+5. **Save and Deploy**
+
+> または、CLIでデプロイ:
+> ```bash
+> npm run deploy
+> ```
 
 ---
 
-## 手順 8: 動作確認
+### 4. D1バインディングをPagesプロジェクトに設定する
 
-1. PagesプロジェクトのURL（例: `https://group-semi-2026.pages.dev`）にアクセス
-2. カレンダーが表示されることを確認
-3. ゼミ予定の追加・編集・削除が動作することを確認
+Cloudflareダッシュボードで:
 
----
+1. **Workers & Pages** → `group-semi-2026` → **Settings** → **Bindings**
+2. **Add binding** → **D1 database**
+3. 変数名: `DB`（大文字、`wrangler.toml` の `binding` と一致させること）
+4. D1データベース: `group-semi-2026-db` を選択
+5. **Save**
 
-## Cloudflare リソース一覧
-
-セットアップ完了後、以下のリソースが作成されます:
-
-| リソース | 名前 | 場所 |
-|---------|------|------|
-| Pages プロジェクト | `group-semi-2026` | Workers & Pages |
-| D1 データベース | `group-semi-2026-db` | Storage & Databases → D1 |
+> ⚠️ この設定をしないとAPIが動作しません。
 
 ---
 
-## よくある問題
+### 5. 再デプロイして確認
 
-### デプロイ後にAPIが500エラーになる
-→ 手順6のD1バインディングが設定されているか確認。設定後に再デプロイが必要。
+```bash
+npm run deploy
+```
 
-### ビルドが失敗する
-→ 手順5-3の `NODE_VERSION=18` が設定されているか確認。
+デプロイ後、`https://group-semi-2026.pages.dev`（またはカスタムドメイン）でアクセスして動作確認。
 
-### 本番DBにデータが入らない
-→ 手順7の `npm run db:migrate:remote` を実行したか確認。
+---
+
+## 2回目以降のデプロイ
+
+```bash
+# コードを変更してプッシュ → Cloudflareが自動ビルド＆デプロイ
+git push origin main
+
+# または手動デプロイ
+npm run deploy
+```
+
+---
+
+## DBスキーマを変更した場合
+
+```bash
+# 新しいマイグレーションファイルを作成
+# ファイル名: migrations/0002_xxxx.sql（連番）
+
+# ローカルに適用
+npm run db:migrate
+
+# 本番に適用
+npm run db:migrate:remote
+```
+
+---
+
+## GitHub Actions 自動デプロイの設定（任意）
+
+`main` ブランチへのプッシュで自動デプロイされるよう設定できます。
+
+### 1. API Token の作成
+
+Cloudflare Dashboard → **My Profile** → **API Tokens** → **Create Token**
+
+- テンプレート「**Edit Cloudflare Workers**」を選択
+- 追加で以下の権限を付与:
+  - `D1:Edit`（D1データベースへのアクセス）
+  - `Cloudflare Pages:Edit`
+
+### 2. GitHub Secrets に登録
+
+リポジトリ → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
+
+| Secret名 | 値 | 取得場所 |
+|---|---|---|
+| `CLOUDFLARE_API_TOKEN` | 上で作成したトークン | Cloudflare → API Tokens |
+| `CLOUDFLARE_ACCOUNT_ID` | アカウントID | Cloudflare Dashboard 右サイドバー |
+
+### 3. 動作確認
+
+`main` にプッシュするとGitHub Actions（`.github/workflows/deploy.yml`）が起動し、自動でビルド＆デプロイされます。
+
+---
+
+## カスタムドメインの設定
+
+1. Cloudflareダッシュボード → `group-semi-2026` → **Custom domains**
+2. ドメインを追加（Cloudflareで管理しているドメインが必要）
+
+---
+
+## トラブルシューティング
+
+| 症状 | 確認箇所 |
+|---|---|
+| APIが500エラー | D1バインディングが設定されているか確認 |
+| `database_id` が `REPLACE_WITH_YOUR_DATABASE_ID` のまま | `wrangler.toml` を更新 |
+| ビルドエラー | `npm run pages:build` をローカルで実行してエラーを確認 |
+| D1にデータがない | `npm run db:migrate:remote` を実行 |
+| Edge Runtime エラー | APIルートに `export const runtime = 'edge'` があるか確認 |

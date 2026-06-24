@@ -31,24 +31,19 @@ export default function SeminarCard({ seminar, onClick }: Props) {
         )}
       </div>
 
-      {/* Assignees */}
+      {/* Assignees — always show all roles, truncate gracefully */}
       {assignees.length > 0 && (
-        <div className="mt-0.5 flex flex-wrap gap-x-1.5 gap-y-0.5 pl-2.5">
-          {seminar.assignee_a && (
-            <span className="text-xs opacity-80 truncate">
-              <span className="font-semibold opacity-60">A</span> {seminar.assignee_a}
-            </span>
-          )}
-          {seminar.assignee_b && (
-            <span className="text-xs opacity-80 truncate hidden sm:inline">
-              <span className="font-semibold opacity-60">B</span> {seminar.assignee_b}
-            </span>
-          )}
-          {seminar.assignee_c && (
-            <span className="text-xs opacity-80 truncate hidden md:inline">
-              <span className="font-semibold opacity-60">C</span> {seminar.assignee_c}
-            </span>
-          )}
+        <div className="mt-0.5 flex flex-col gap-y-0.5 pl-2.5">
+          {(['a', 'b', 'c'] as const).map((role) => {
+            const name = seminar[`assignee_${role}`];
+            if (!name) return null;
+            return (
+              <span key={role} className="text-xs opacity-80 truncate leading-tight">
+                <span className="font-bold opacity-50 mr-0.5 uppercase">{role}</span>
+                {name}
+              </span>
+            );
+          })}
         </div>
       )}
     </button>
