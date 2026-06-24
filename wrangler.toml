@@ -3,6 +3,16 @@ compatibility_date = "2024-07-01"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".vercel/output/static"
 
+# =====================================================
+# D1 データベース設定
+# =====================================================
+# database_id の取得方法:
+#   1. `npx wrangler d1 create group-semi-2026-db` を実行
+#   2. 出力された database_id をここに貼り付ける
+#
+# 初回セットアップ: docs/SETUP.md の手順4 を参照
+# Cloudflare手順: docs/cloudflare-setup.md の手順4 を参照
+# =====================================================
 [[d1_databases]]
 binding = "DB"
 database_name = "group-semi-2026-db"

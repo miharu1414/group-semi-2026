@@ -1,116 +1,64 @@
 # 班ゼミカレンダー 2026
 
-班ゼミ（輪読ゼミ・全体ゼミ・研究共有）の予定・担当者を管理するWebアプリです。
+輪読ゼミ・全体ゼミ・研究共有の予定・担当者を管理するWebアプリです。
 
 **Tech Stack:** Next.js 14 + TypeScript + Tailwind CSS + Cloudflare Pages + Cloudflare D1
 
 ---
 
-## セットアップ
+## クイックスタート
 
-### 1. 依存関係インストール
 ```bash
+# 1. 依存関係インストール
 npm install
-```
 
-### 2. Cloudflare にログイン
-```bash
+# 2. 環境変数設定
+cp .env.example .env.local   # 値を入力する（または wrangler login でOK）
+
+# 3. Cloudflare ログイン
 npx wrangler login
-```
 
-### 3. D1 データベース作成
-```bash
-npx wrangler d1 create group-semi-2026-db
-```
+# 4. wrangler.toml に database_id を設定（初回のみ）
+#    → docs/SETUP.md 手順4 を参照
 
-出力に含まれる `database_id` を `wrangler.toml` の `REPLACE_WITH_YOUR_DATABASE_ID` に貼り付けます。
-
-### 4. マイグレーション実行
-
-ローカル（開発用）:
-```bash
+# 5. DBマイグレーション（ローカル）
 npm run db:migrate
-```
 
-リモート（本番）:
-```bash
-npm run db:migrate:remote
-```
-
-### 5. 開発サーバー起動
-```bash
-npm run dev
-# → http://localhost:3000
-```
-
-Cloudflare Workers/D1 バインディングを使ったローカルプレビュー:
-```bash
-npm run preview
-# → http://localhost:8788
+# 6. ローカルプレビュー起動（API込み）
+npm run preview   # → http://localhost:8788
 ```
 
 ---
 
-## Cloudflare Pages デプロイ
+## ドキュメント
 
-```bash
-npm run deploy
-```
-
-または Cloudflare Dashboard の **Pages** から GitHub リポジトリを連携:
-- Framework preset: `Next.js`
-- Build command: `npx @cloudflare/next-on-pages@1`
-- Build output directory: `.vercel/output/static`
-- 環境変数: `NODE_VERSION=18`
-
-D1 バインディングを Pages プロジェクトの設定から追加してください:
-- Variable name: `DB`
-- D1 database: `group-semi-2026-db`
+| ドキュメント | 内容 |
+|------------|------|
+| [docs/SETUP.md](docs/SETUP.md) | 詳細セットアップ手順（他PCでの開発開始方法）|
+| [docs/cloudflare-setup.md](docs/cloudflare-setup.md) | Cloudflare手動セットアップ手順書 |
+| [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | 要件定義 |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | システム構成・API設計 |
+| [docs/PROGRESS.md](docs/PROGRESS.md) | 進捗管理・タスク一覧 |
+| [CLAUDE.md](CLAUDE.md) | AI開発ガイド（Claude Code用）|
 
 ---
 
-## 機能一覧
+## 主要コマンド
 
-| 機能 | 説明 |
-|------|------|
-| 月次カレンダー表示 | 大きく見やすいグリッドカレンダー |
-| ゼミ種別色分け | 輪読ゼミ（インディゴ）/ 全体ゼミ（バイオレット）/ 研究共有（ティール） |
-| 担当者表示 | A・B・C ロール別担当者名を各日付に表示 |
-| CRUD 操作 | 予定の追加・編集・削除、メンバー管理 |
-| レスポンシブ | PC・タブレット・スマートフォン対応 |
+| コマンド | 説明 |
+|---------|------|
+| `npm run dev` | 開発サーバー起動（UIのみ、APIなし）|
+| `npm run preview` | フルローカルプレビュー（API + D1込み）|
+| `npm run deploy` | Cloudflare Pagesへデプロイ |
+| `npm run db:migrate` | ローカルDBマイグレーション |
+| `npm run db:migrate:remote` | 本番DBマイグレーション |
 
 ---
 
-## 開発メモ
+## 機能
 
-### ブランチ運用
-- `main`: 本番環境
-- `develop`: 開発ブランチ
-- `feature/*`: 機能追加
-
-### ディレクトリ構成
-```
-group-semi-2026/
-├── app/                    # Next.js App Router
-│   ├── api/
-│   │   ├── seminars/       # ゼミ予定 CRUD API
-│   │   └── members/        # メンバー CRUD API
-│   ├── layout.tsx
-│   ├── page.tsx
-│   └── globals.css
-├── components/
-│   ├── CalendarApp.tsx     # メインコンテナ（状態管理）
-│   ├── Calendar/
-│   │   ├── CalendarView.tsx
-│   │   └── SeminarCard.tsx
-│   └── Modals/
-│       ├── SeminarModal.tsx
-│       └── MembersModal.tsx
-├── lib/
-│   ├── types.ts            # 型定義
-│   └── api.ts              # クライアント側 fetch ヘルパー
-├── migrations/
-│   └── 0001_schema.sql     # D1 スキーマ
-├── wrangler.toml           # Cloudflare 設定
-└── setup.ps1               # セットアップスクリプト
-```
+- 月次カレンダー表示（種別色分け：輪読/全体/研究共有）
+- 担当者A・B・Cの表示・管理
+- ゼミ予定のCRUD操作
+- メンバー管理
+- レスポンシブ対応（PC・スマホ）
