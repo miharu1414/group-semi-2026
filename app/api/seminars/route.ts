@@ -1,22 +1,16 @@
-import { getRequestContext } from '@cloudflare/next-on-pages';
-
-export const runtime = 'edge';
+import { db } from '@/lib/firebase-admin';
 
 export async function GET(request: Request) {
   try {
-    const { env } = getRequestContext() as { env: CloudflareEnv };
     const { searchParams } = new URL(request.url);
-    const month = searchParams.get('month');
+    const month = searchParams.get('month'); // yyyy-MM
 
-    const result = month
-      ? await env.DB.prepare(
-          'SELECT * FROM seminars WHERE date LIKE ? ORDER BY date ASC'
-        )
-          .bind(`${month}-%`)
-          .all()
-      : await env.DB.prepare('SELECT * FROM seminars ORDER BY date ASC').all();
+    const snapshot = await db.collection('seminars').orderBy('date', 'asc').get();
+    const seminars = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as { id: string; date: string; [key: string]: unknown }));
 
-    return Response.json(result.results);
+    return Response.json(
+      month ? seminars.filter((s) => s.date.startsWith(month)) : seminars
+    );
   } catch (e) {
     console.error('GET /api/seminars error:', e);
     return Response.json({ error: 'Internal server error' }, { status: 500 });
@@ -25,7 +19,6 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { env } = getRequestContext() as { env: CloudflareEnv };
     const body = (await request.json()) as {
       date: string;
       type: string;
@@ -40,32 +33,21 @@ export async function POST(request: Request) {
       return Response.json({ error: 'date and type are required' }, { status: 400 });
     }
 
-    const id = crypto.randomUUID();
     const now = new Date().toISOString();
+    const data = {
+      date: body.date,
+      type: body.type,
+      title: body.title ?? '',
+      assignee_a: body.assignee_a ?? '',
+      assignee_b: body.assignee_b ?? '',
+      assignee_c: body.assignee_c ?? '',
+      notes: body.notes ?? '',
+      created_at: now,
+      updated_at: now,
+    };
 
-    await env.DB.prepare(
-      `INSERT INTO seminars (id, date, type, title, assignee_a, assignee_b, assignee_c, notes, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    )
-      .bind(
-        id,
-        body.date,
-        body.type,
-        body.title ?? '',
-        body.assignee_a ?? '',
-        body.assignee_b ?? '',
-        body.assignee_c ?? '',
-        body.notes ?? '',
-        now,
-        now
-      )
-      .run();
-
-    const seminar = await env.DB.prepare('SELECT * FROM seminars WHERE id = ?')
-      .bind(id)
-      .first();
-
-    return Response.json(seminar, { status: 201 });
+    const ref = await db.collection('seminars').add(data);
+    return Response.json({ id: ref.id, ...data }, { status: 201 });
   } catch (e) {
     console.error('POST /api/seminars error:', e);
     return Response.json({ error: 'Internal server error' }, { status: 500 });

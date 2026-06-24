@@ -1,19 +1,13 @@
-import { getRequestContext } from '@cloudflare/next-on-pages';
-
-export const runtime = 'edge';
+import { db } from '@/lib/firebase-admin';
 
 export async function GET(
   _request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const { env } = getRequestContext() as { env: CloudflareEnv };
-    const seminar = await env.DB.prepare('SELECT * FROM seminars WHERE id = ?')
-      .bind(params.id)
-      .first();
-
-    if (!seminar) return Response.json({ error: 'Not found' }, { status: 404 });
-    return Response.json(seminar);
+    const doc = await db.collection('seminars').doc(params.id).get();
+    if (!doc.exists) return Response.json({ error: 'Not found' }, { status: 404 });
+    return Response.json({ id: doc.id, ...doc.data() });
   } catch (e) {
     console.error('GET /api/seminars/[id] error:', e);
     return Response.json({ error: 'Internal server error' }, { status: 500 });
@@ -25,7 +19,10 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { env } = getRequestContext() as { env: CloudflareEnv };
+    const ref = db.collection('seminars').doc(params.id);
+    const existing = await ref.get();
+    if (!existing.exists) return Response.json({ error: 'Not found' }, { status: 404 });
+
     const body = (await request.json()) as {
       date?: string;
       type?: string;
@@ -36,36 +33,11 @@ export async function PUT(
       notes?: string;
     };
 
-    const existing = await env.DB.prepare('SELECT * FROM seminars WHERE id = ?')
-      .bind(params.id)
-      .first();
-    if (!existing) return Response.json({ error: 'Not found' }, { status: 404 });
+    const updates = { ...body, updated_at: new Date().toISOString() };
+    await ref.update(updates);
 
-    const now = new Date().toISOString();
-
-    await env.DB.prepare(
-      `UPDATE seminars
-       SET date = ?, type = ?, title = ?, assignee_a = ?, assignee_b = ?, assignee_c = ?, notes = ?, updated_at = ?
-       WHERE id = ?`
-    )
-      .bind(
-        body.date ?? existing.date,
-        body.type ?? existing.type,
-        body.title ?? existing.title,
-        body.assignee_a ?? existing.assignee_a,
-        body.assignee_b ?? existing.assignee_b,
-        body.assignee_c ?? existing.assignee_c,
-        body.notes ?? existing.notes,
-        now,
-        params.id
-      )
-      .run();
-
-    const updated = await env.DB.prepare('SELECT * FROM seminars WHERE id = ?')
-      .bind(params.id)
-      .first();
-
-    return Response.json(updated);
+    const updated = await ref.get();
+    return Response.json({ id: updated.id, ...updated.data() });
   } catch (e) {
     console.error('PUT /api/seminars/[id] error:', e);
     return Response.json({ error: 'Internal server error' }, { status: 500 });
@@ -77,13 +49,11 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { env } = getRequestContext() as { env: CloudflareEnv };
-    const existing = await env.DB.prepare('SELECT id FROM seminars WHERE id = ?')
-      .bind(params.id)
-      .first();
-    if (!existing) return Response.json({ error: 'Not found' }, { status: 404 });
+    const ref = db.collection('seminars').doc(params.id);
+    const existing = await ref.get();
+    if (!existing.exists) return Response.json({ error: 'Not found' }, { status: 404 });
 
-    await env.DB.prepare('DELETE FROM seminars WHERE id = ?').bind(params.id).run();
+    await ref.delete();
     return new Response(null, { status: 204 });
   } catch (e) {
     console.error('DELETE /api/seminars/[id] error:', e);

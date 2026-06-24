@@ -1,23 +1,23 @@
 # ============================================================
-# Cloudflare Pages 自動デプロイ
+# Vercel 自動デプロイ
 # ============================================================
 # main ブランチへのプッシュで自動デプロイされます。
 #
 # 【GitHub Secrets の設定（初回のみ）】
-#   リポジトリ → Settings → Secrets and variables → Actions → New repository secret
+#   リポジトリ → Settings → Secrets and variables → Actions
 #
-#   CLOUDFLARE_API_TOKEN : Cloudflare Dashboard → My Profile → API Tokens
-#                          テンプレート「Edit Cloudflare Workers」+ D1:Edit
-#   CLOUDFLARE_ACCOUNT_ID: Cloudflare Dashboard 右サイドバー
+#   VERCEL_TOKEN     : Vercel Dashboard → Settings → Tokens
+#   VERCEL_ORG_ID    : vercel.json または `vercel env pull` で確認
+#   VERCEL_PROJECT_ID: vercel.json または `vercel env pull` で確認
 # ============================================================
 
-name: Deploy to Cloudflare Pages
+name: Deploy to Vercel
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch: # 手動実行も可能
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -37,15 +37,14 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
 
-      - name: Build for Cloudflare Pages
-        run: npm run pages:build
+      - name: Pull Vercel environment
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy .vercel/output/static --project-name=group-semi-2026 --branch main
+      - name: Build project
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}

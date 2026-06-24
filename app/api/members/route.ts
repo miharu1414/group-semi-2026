@@ -1,14 +1,10 @@
-import { getRequestContext } from '@cloudflare/next-on-pages';
-
-export const runtime = 'edge';
+import { db } from '@/lib/firebase-admin';
 
 export async function GET() {
   try {
-    const { env } = getRequestContext() as { env: CloudflareEnv };
-    const result = await env.DB.prepare(
-      'SELECT * FROM members ORDER BY order_num ASC, created_at ASC'
-    ).all();
-    return Response.json(result.results);
+    const snapshot = await db.collection('members').orderBy('order_num', 'asc').get();
+    const members = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    return Response.json(members);
   } catch (e) {
     console.error('GET /api/members error:', e);
     return Response.json({ error: 'Internal server error' }, { status: 500 });
@@ -17,7 +13,6 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { env } = getRequestContext() as { env: CloudflareEnv };
     const body = (await request.json()) as {
       name: string;
       role?: string;
@@ -28,26 +23,19 @@ export async function POST(request: Request) {
       return Response.json({ error: 'name is required' }, { status: 400 });
     }
 
-    const id = crypto.randomUUID();
-    const now = new Date().toISOString();
+    const snapshot = await db.collection('members').orderBy('order_num', 'desc').limit(1).get();
+    const maxOrder = snapshot.empty ? 0 : (snapshot.docs[0].data().order_num as number) ?? 0;
+    const orderNum = body.order_num ?? maxOrder + 1;
 
-    const maxRow = await env.DB.prepare(
-      'SELECT MAX(order_num) as max_order FROM members'
-    ).first<{ max_order: number | null }>();
-    const orderNum = body.order_num ?? (maxRow?.max_order ?? 0) + 1;
+    const data = {
+      name: body.name.trim(),
+      role: body.role ?? '',
+      order_num: orderNum,
+      created_at: new Date().toISOString(),
+    };
 
-    await env.DB.prepare(
-      `INSERT INTO members (id, name, role, order_num, created_at)
-       VALUES (?, ?, ?, ?, ?)`
-    )
-      .bind(id, body.name.trim(), body.role ?? '', orderNum, now)
-      .run();
-
-    const member = await env.DB.prepare('SELECT * FROM members WHERE id = ?')
-      .bind(id)
-      .first();
-
-    return Response.json(member, { status: 201 });
+    const ref = await db.collection('members').add(data);
+    return Response.json({ id: ref.id, ...data }, { status: 201 });
   } catch (e) {
     console.error('POST /api/members error:', e);
     return Response.json({ error: 'Internal server error' }, { status: 500 });
