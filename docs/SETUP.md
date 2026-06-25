@@ -44,12 +44,22 @@ npm run dev
 
 `http://localhost:3000` を開きます。
 
+`npm run dev` は起動前に `.next` を削除し、ホットリロード用の開発キャッシュを作り直します。dev server起動中に `npm run build` を実行すると、同じ `.next` ディレクトリが上書きされ、CSS/JS chunkが404になってUIが崩れることがあります。
+
+Do not run npm run build while the dev server is running.
+
 ## 4. 動作確認
 
+dev serverを起動したまま確認する場合:
+
 ```bash
-npm run docs:check
-npm run lint
-npm run build
+npm run check:dev
+```
+
+dev serverを停止して本番ビルドまで確認する場合:
+
+```bash
+npm run check
 ```
 
 ## 注意

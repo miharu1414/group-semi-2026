@@ -22,6 +22,9 @@ export async function POST(request: Request) {
     if (!body.name?.trim()) {
       return Response.json({ error: 'name is required' }, { status: 400 });
     }
+    if (body.order_num !== undefined && (!Number.isFinite(body.order_num) || body.order_num < 0)) {
+      return Response.json({ error: 'order_num must be a non-negative number' }, { status: 400 });
+    }
 
     const snapshot = await db.collection('members').orderBy('order_num', 'desc').limit(1).get();
     const maxOrder = snapshot.empty ? 0 : (snapshot.docs[0].data().order_num as number) ?? 0;
@@ -29,7 +32,7 @@ export async function POST(request: Request) {
 
     const data = {
       name: body.name.trim(),
-      role: body.role ?? '',
+      role: body.role?.trim() ?? '',
       order_num: orderNum,
       created_at: new Date().toISOString(),
     };

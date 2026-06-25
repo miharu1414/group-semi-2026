@@ -13,17 +13,10 @@ import InfoModal from './Modals/InfoModal';
 import MemberScheduleModal from './Modals/MemberScheduleModal';
 import NoticeBoard from './NoticeBoard';
 import { SeminarFormData } from '@/lib/types';
+import { compareSeminars } from '@/lib/seminar-sort';
 
 function sortSeminars(items: Seminar[]) {
-  return [...items].sort((a, b) => {
-    const dateCompare = a.date.localeCompare(b.date);
-    if (dateCompare !== 0) return dateCompare;
-
-    const timeCompare = (a.start_time || '99:99').localeCompare(b.start_time || '99:99');
-    if (timeCompare !== 0) return timeCompare;
-
-    return a.title.localeCompare(b.title);
-  });
+  return [...items].sort(compareSeminars);
 }
 
 export default function CalendarApp() {

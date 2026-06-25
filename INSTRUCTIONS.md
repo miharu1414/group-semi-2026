@@ -18,6 +18,8 @@
 - `.ps1` / `.bat` など個人環境向け初期化スクリプトは追加しない
 - Do not commit or push without explicit user instruction.
 - ユーザーから明示的な指示がない限り、`git commit` と `git push` は実行しない
+- Do not run npm run build while the dev server is running.
+- ローカル開発中は `npm run dev` のホットリロードを使い、dev server起動中に `npm run build` を実行しない
 - 機能実装や運用ルール変更を行った場合は、`docs/memo` に `YYYY-MM-DD-kebab-case-summary.md` 形式のメモを残す
 - アーキテクチャ、DB、環境変数、セットアップ手順を変える場合は `docs/PROJECT_CONTEXT.json` と関連ドキュメントを同時に更新する
 

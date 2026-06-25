@@ -32,5 +32,6 @@ Current stack:
 - Secrets stay in `.env.local` or deployment platform secrets.
 - Do not commit Firebase service account JSON files.
 - Do not commit or push without explicit user instruction.
+- Do not run npm run build while the dev server is running.
 - Feature and operations changes must leave a dated memo under `docs/memo`.
 - Run `npm run docs:check` when documentation or architecture assumptions change.

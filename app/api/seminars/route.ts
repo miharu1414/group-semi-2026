@@ -1,9 +1,13 @@
 import { db } from '@/lib/firebase-admin';
-import { normalizeAssigneeB } from '@/lib/types';
+import { normalizeAssigneeList, normalizeSeminarRecord, normalizeText } from '@/lib/seminar-normalize';
 
 const VALID_SEMINAR_TYPES = ['rinudoku', 'zentai', 'kenkyu', 'other'] as const;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+function isValidSeminarType(type: unknown): type is typeof VALID_SEMINAR_TYPES[number] {
+  return typeof type === 'string' && VALID_SEMINAR_TYPES.includes(type as typeof VALID_SEMINAR_TYPES[number]);
+}
 
 export async function GET(request: Request) {
   try {
@@ -11,19 +15,7 @@ export async function GET(request: Request) {
     const month = searchParams.get('month'); // yyyy-MM
 
     const snapshot = await db.collection('seminars').orderBy('date', 'asc').get();
-    type SeminarDoc = { id: string; date: string; assignee_b: string[]; [key: string]: unknown };
-    const seminars = snapshot.docs.map((doc) => {
-      const data = doc.data() as Record<string, unknown>;
-      return {
-        id: doc.id,
-        ...data,
-        assignee_b: normalizeAssigneeB(data.assignee_b),
-        custom_label: (data.custom_label as string) ?? '',
-        activity_id: (data.activity_id as string) ?? '',
-        start_time: (data.start_time as string) ?? '',
-        end_time: (data.end_time as string) ?? '',
-      } as unknown as SeminarDoc;
-    });
+    const seminars = snapshot.docs.map((doc) => normalizeSeminarRecord(doc.id, doc.data()));
 
     return Response.json(
       month ? seminars.filter((s) => s.date.startsWith(month)) : seminars
@@ -50,32 +42,39 @@ export async function POST(request: Request) {
       notes?: string;
     };
 
-    if (!body.date || !DATE_RE.test(body.date)) {
+    const date = normalizeText(body.date);
+    const startTime = normalizeText(body.start_time);
+    const endTime = normalizeText(body.end_time);
+
+    if (!DATE_RE.test(date)) {
       return Response.json({ error: 'valid date (YYYY-MM-DD) is required' }, { status: 400 });
     }
-    if (!body.type || !VALID_SEMINAR_TYPES.includes(body.type as typeof VALID_SEMINAR_TYPES[number])) {
+    if (!isValidSeminarType(body.type)) {
       return Response.json({ error: `type must be one of: ${VALID_SEMINAR_TYPES.join(', ')}` }, { status: 400 });
     }
-    if (body.start_time && !TIME_RE.test(body.start_time)) {
+    if (startTime && !TIME_RE.test(startTime)) {
       return Response.json({ error: 'start_time must be HH:MM' }, { status: 400 });
     }
-    if (body.end_time && !TIME_RE.test(body.end_time)) {
+    if (endTime && !TIME_RE.test(endTime)) {
       return Response.json({ error: 'end_time must be HH:MM' }, { status: 400 });
+    }
+    if (startTime && endTime && startTime > endTime) {
+      return Response.json({ error: 'end_time must be after start_time' }, { status: 400 });
     }
 
     const now = new Date().toISOString();
     const data = {
-      date: body.date,
+      date,
       type: body.type,
-      title: body.title ?? '',
-      custom_label: body.custom_label ?? '',
-      activity_id: body.activity_id ?? '',
-      start_time: body.start_time ?? '',
-      end_time: body.end_time ?? '',
-      assignee_a: body.assignee_a ?? '',
-      assignee_b: body.assignee_b ?? [],
-      assignee_c: body.assignee_c ?? '',
-      notes: body.notes ?? '',
+      title: normalizeText(body.title),
+      custom_label: normalizeText(body.custom_label),
+      activity_id: normalizeText(body.activity_id),
+      start_time: startTime,
+      end_time: endTime,
+      assignee_a: normalizeText(body.assignee_a),
+      assignee_b: normalizeAssigneeList(body.assignee_b),
+      assignee_c: normalizeText(body.assignee_c),
+      notes: normalizeText(body.notes),
       created_at: now,
       updated_at: now,
     };

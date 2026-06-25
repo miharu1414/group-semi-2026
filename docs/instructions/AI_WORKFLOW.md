@@ -14,6 +14,7 @@
 - Do not add personal setup scripts.
 - Do not expose secrets in tracked files or final responses.
 - Do not commit or push without explicit user instruction.
+- Do not run npm run build while the dev server is running.
 - When implementing a feature or changing project operations, add a memo under `docs/memo` named `YYYY-MM-DD-kebab-case-summary.md`.
 
 ## Verification

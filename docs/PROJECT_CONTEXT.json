@@ -50,11 +50,13 @@
   },
   "operationalRules": {
     "commitPushPermission": "Do not commit or push without explicit user instruction.",
+    "localDevHotReload": "Use npm run dev for local hot reload. Do not run npm run build while the dev server is running.",
     "featureMemoDirectory": "docs/memo",
     "featureMemoFilenamePattern": "YYYY-MM-DD-kebab-case-summary.md",
     "requiredDocTerms": [
       "Do not commit or push without explicit user instruction.",
-      "docs/memo"
+      "docs/memo",
+      "Do not run npm run build while the dev server is running."
     ]
   },
   "deprecatedClaims": [

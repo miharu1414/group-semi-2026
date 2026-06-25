@@ -30,6 +30,7 @@ Group Seminar Calendar 2026 is a Next.js 14 + TypeScript + Tailwind CSS app for 
 - Never commit `.env.local`, Firebase service account JSON files, private keys, or generated credential files.
 - Do not add personal setup scripts such as `.ps1` or `.bat`.
 - Do not commit or push without explicit user instruction.
+- Do not run npm run build while the dev server is running.
 - When implementing a feature or changing project operations, add a memo under `docs/memo` named `YYYY-MM-DD-kebab-case-summary.md`.
 - If architecture, DB, env vars, or setup steps change, update `docs/PROJECT_CONTEXT.json` and the affected docs in the same change.
 

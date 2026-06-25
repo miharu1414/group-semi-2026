@@ -14,6 +14,8 @@ npm run dev
 
 開発サーバーは `http://localhost:3000` で起動します。
 
+`npm run dev` は起動前に `.next` をクリアし、Next.jsのホットリロード環境をクリーンにします。dev serverを起動したまま `npm run build` を実行するとHMR用のCSS/JS chunkが壊れるため、buildはdev serverを止めてから実行してください。スクリプト側でもこの状態は拒否します。
+
 ## Documentation Governance
 
 アーキテクチャ、DB、環境変数、セットアップ手順、AI向け指示を変更する前に、次を確認してください。
@@ -49,9 +51,12 @@ FIREBASE_PRIVATE_KEY=
 | --- | --- |
 | `npm run dev` | Next.js開発サーバーを起動 |
 | `npm run build` | 本番ビルド |
+| `npm run dev:next` | キャッシュ掃除なしでNext.js開発サーバーを直接起動 |
 | `npm run start` | ビルド済みアプリを起動 |
 | `npm run lint` | ESLintチェック |
+| `npm run typecheck` | TypeScript型チェック |
 | `npm run docs:check` | ドキュメント整合性チェック |
+| `npm run check:dev` | dev server起動中でも安全なチェック |
 | `npm run check` | ドキュメント、lint、buildをまとめて確認 |
 
 ## Main Files

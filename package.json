@@ -3,12 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/clean-next-dev-cache.mjs && next dev",
+    "dev:next": "next dev",
+    "prebuild": "node scripts/assert-dev-server-stopped.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
     "docs:check": "node scripts/check-doc-consistency.mjs",
-    "check": "npm run docs:check && npm run lint && npm run build"
+    "check:dev": "npm run docs:check && npm run lint && npm run typecheck",
+    "check": "npm run docs:check && npm run lint && npm run typecheck && npm run build"
   },
   "dependencies": {
     "next": "14.2.5",

@@ -15,6 +15,7 @@ import { ja } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Seminar } from '@/lib/types';
 import { getEventConfig } from '@/lib/activity-config';
+import { compareSeminarsWithinDay } from '@/lib/seminar-sort';
 import SeminarCard from './SeminarCard';
 
 interface Props {
@@ -56,10 +57,7 @@ export default function CalendarView({
     seminarsByDate[s.date].push(s);
   });
   Object.values(seminarsByDate).forEach((items) => {
-    items.sort((a, b) => {
-      const timeCompare = (a.start_time || '99:99').localeCompare(b.start_time || '99:99');
-      return timeCompare !== 0 ? timeCompare : a.title.localeCompare(b.title);
-    });
+    items.sort(compareSeminarsWithinDay);
   });
 
   return (
