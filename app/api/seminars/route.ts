@@ -14,12 +14,23 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const month = searchParams.get('month'); // yyyy-MM
 
-    const snapshot = await db.collection('seminars').orderBy('date', 'asc').get();
+    const base = db.collection('seminars').orderBy('date', 'asc');
+    const query = (month && /^\d{4}-\d{2}$/.test(month))
+      ? (() => {
+          // Server-side range filter avoids fetching the entire collection
+          const [y, mo] = month.split('-').map(Number);
+          const nextDate = new Date(y, mo, 1); // mo is 1-indexed; JS Date month is 0-indexed → first day of next month
+          const nextYYYYMM = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}`;
+          return base
+            .where('date', '>=', `${month}-01`)
+            .where('date', '<', `${nextYYYYMM}-01`);
+        })()
+      : base;
+
+    const snapshot = await query.get();
     const seminars = snapshot.docs.map((doc) => normalizeSeminarRecord(doc.id, doc.data()));
 
-    return Response.json(
-      month ? seminars.filter((s) => s.date.startsWith(month)) : seminars
-    );
+    return Response.json(seminars);
   } catch (e) {
     console.error('GET /api/seminars error:', e);
     return Response.json({ error: 'Internal server error' }, { status: 500 });

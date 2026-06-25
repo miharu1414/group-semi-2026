@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   format,
   startOfMonth,
@@ -28,7 +28,7 @@ interface Props {
   onDayClick: (dateStr: string) => void;
   onQuickAdd: (dateStr: string) => void;
   onSeminarClick: (seminar: Seminar) => void;
-  /** Direction the new month slides in from (for CSS animation). */
+  /** Direction the new month slides in from (for CSS animation). Omit on first render to suppress initial animation. */
   slideDir?: 'prev' | 'next';
 }
 
@@ -49,18 +49,31 @@ export default function CalendarView({
   onDayClick,
   onQuickAdd,
   onSeminarClick,
-  slideDir = 'next',
+  slideDir,
 }: Props) {
   const [hoveredDate, setHoveredDate] = useState<string | null>(null);
 
-  // ── Swipe gesture state ──────────────────────────────────────────────────
-  const [swipeOffset, setSwipeOffset] = useState(0);
+  // ── Swipe gesture — ref-based to avoid React re-renders during drag ────────
+  const gridRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
   const touchStartTime = useRef<number | null>(null);
   const swipeLocked = useRef<'horizontal' | 'vertical' | null>(null);
+  // Holds the transitionend cleanup fn so we can cancel it on the next touch
+  const springCleanupRef = useRef<(() => void) | null>(null);
+
+  const cancelSpring = () => {
+    if (springCleanupRef.current && gridRef.current) {
+      gridRef.current.removeEventListener('transitionend', springCleanupRef.current);
+      springCleanupRef.current = null;
+    }
+    if (gridRef.current) {
+      gridRef.current.style.transition = '';
+    }
+  };
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    cancelSpring();
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
     touchStartTime.current = Date.now();
@@ -72,16 +85,17 @@ export default function CalendarView({
     const dx = e.touches[0].clientX - touchStartX.current;
     const dy = e.touches[0].clientY - touchStartY.current;
 
-    // Determine direction lock on first meaningful movement
+    // Lock direction on first meaningful movement (10px threshold avoids jitter)
     if (!swipeLocked.current) {
-      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+      if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
         swipeLocked.current = Math.abs(dx) > Math.abs(dy) ? 'horizontal' : 'vertical';
       }
     }
 
-    if (swipeLocked.current === 'horizontal') {
-      // Damped drag — tactile feedback without committing
-      setSwipeOffset(dx * 0.28);
+    if (swipeLocked.current === 'horizontal' && gridRef.current) {
+      // 0.4× damping: tactile drag feedback without committing
+      gridRef.current.style.transform = `translateX(${dx * 0.4}px)`;
+      gridRef.current.style.willChange = 'transform';
     }
   };
 
@@ -95,16 +109,30 @@ export default function CalendarView({
     const dx = e.changedTouches[0].clientX - touchStartX.current;
     const dt = Math.max(1, Date.now() - touchStartTime.current);
     const vx = Math.abs(dx) / dt;
+    const triggered =
+      swipeLocked.current === 'horizontal' &&
+      (Math.abs(dx) > SWIPE_THRESHOLD || vx > SWIPE_VELOCITY);
 
-    // Clear drag immediately; month change (if any) triggers slide animation
-    setSwipeOffset(0);
-
-    if (swipeLocked.current === 'horizontal') {
-      const triggered = Math.abs(dx) > SWIPE_THRESHOLD || vx > SWIPE_VELOCITY;
-      if (triggered) {
-        if (dx > 0) onPrevMonth();
-        else onNextMonth();
+    if (triggered) {
+      // Month changes → grid remounts; clear style before unmount
+      if (gridRef.current) {
+        gridRef.current.style.transform = '';
+        gridRef.current.style.willChange = 'auto';
       }
+      if (dx > 0) onPrevMonth();
+      else onNextMonth();
+    } else if (swipeLocked.current === 'horizontal' && gridRef.current) {
+      // Spring back with smooth ease-out transition
+      const el = gridRef.current;
+      const cleanup = () => {
+        el.style.transition = '';
+        el.style.willChange = 'auto';
+        springCleanupRef.current = null;
+      };
+      springCleanupRef.current = cleanup;
+      el.addEventListener('transitionend', cleanup, { once: true });
+      el.style.transition = 'transform 0.18s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      el.style.transform = 'translateX(0)';
     }
 
     touchStartX.current = null;
@@ -114,7 +142,18 @@ export default function CalendarView({
   };
 
   const handleTouchCancel = () => {
-    setSwipeOffset(0);
+    if (swipeLocked.current === 'horizontal' && gridRef.current) {
+      const el = gridRef.current;
+      const cleanup = () => {
+        el.style.transition = '';
+        el.style.willChange = 'auto';
+        springCleanupRef.current = null;
+      };
+      springCleanupRef.current = cleanup;
+      el.addEventListener('transitionend', cleanup, { once: true });
+      el.style.transition = 'transform 0.18s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      el.style.transform = 'translateX(0)';
+    }
     touchStartX.current = null;
     touchStartY.current = null;
     touchStartTime.current = null;
@@ -138,12 +177,22 @@ export default function CalendarView({
 
   // Grid remounts when month changes → CSS slide animation replays
   const gridKey = format(currentMonth, 'yyyy-MM');
-  const gridAnimClass = slideDir === 'next' ? 'cal-slide-next' : 'cal-slide-prev';
+  const gridAnimClass = slideDir === 'next'
+    ? 'cal-slide-next'
+    : slideDir === 'prev'
+    ? 'cal-slide-prev'
+    : '';
 
   return (
     <div
-      className="flex flex-col select-none"
+      className="flex flex-col select-none outline-none"
+      tabIndex={0}
       style={{ touchAction: 'pan-y' }}
+      onKeyDown={(e) => {
+        // Arrow keys navigate months when calendar wrapper is focused
+        if (e.key === 'ArrowLeft') { onPrevMonth(); e.preventDefault(); }
+        if (e.key === 'ArrowRight') { onNextMonth(); e.preventDefault(); }
+      }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -200,14 +249,11 @@ export default function CalendarView({
       </div>
 
       {/* Calendar Grid — remounts on month change to replay slide animation.
-          swipeOffset gives real-time drag feedback while finger moves.         */}
+          Transform during drag is applied directly via gridRef (no React state). */}
       <div
+        ref={gridRef}
         key={gridKey}
         className={`calendar-month-grid grid grid-cols-7 border-l border-t border-slate-200/60 ${gridAnimClass}`}
-        style={{
-          transform: swipeOffset !== 0 ? `translateX(${swipeOffset}px)` : undefined,
-          willChange: swipeOffset !== 0 ? 'transform' : 'auto',
-        }}
       >
         {days.map((day) => {
           const dateStr = format(day, 'yyyy-MM-dd');

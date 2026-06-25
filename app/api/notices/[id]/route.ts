@@ -13,6 +13,9 @@ export async function PUT(
     if (!body.body?.trim()) {
       return Response.json({ error: 'body is required' }, { status: 400 });
     }
+    if (body.body.length > 1000) {
+      return Response.json({ error: 'body must be 1000 characters or fewer' }, { status: 400 });
+    }
     await ref.update({ body: body.body.trim(), updated_at: new Date().toISOString() });
     const updated = await ref.get();
     return Response.json({ id: updated.id, ...updated.data() });
