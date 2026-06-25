@@ -3,8 +3,17 @@
 ## Before Editing
 
 1. Read the relevant files first.
-2. Check whether the change touches UI, API, Firestore access, or documentation.
-3. Keep changes scoped to the requested behavior.
+2. Check whether the change touches UI, API, Firestore access, documentation, or operations.
+3. Identify the actual user goal, not only the literal requested implementation.
+4. Keep changes scoped to the requested behavior unless a broader fix is needed to prevent regression.
+
+## Critical Review Policy
+
+- Challenge user proposals and document tradeoffs.
+- Do not accept user proposals blindly.
+- If a request introduces risk, explain the risk and suggest a safer alternative.
+- If multiple approaches are viable, prefer the one that is simpler, more maintainable, and consistent with the existing system.
+- Preserve explicitly requested product behavior unless there is a concrete reason to challenge it.
 
 ## Implementation Checklist
 
@@ -19,41 +28,26 @@
 
 ## Verification
 
-Use the narrowest useful checks:
+Use checks that match the current server state.
+
+Safe while the dev server is running:
 
 ```bash
-npm run lint
-npm run build
+npm run check:dev
 ```
 
-Run `npm run build` when API routes, shared types, or configuration change.
+Full verification, only after stopping the dev server:
 
-## Dev Server — Startup and Health Check
-
-Page layout breakage (no CSS, plain text) is almost always a dead or stale dev server, not a code bug. Follow this protocol every session.
-
-### Check first
 ```bash
-curl -s -o /dev/null -w "%{http_code}" http://localhost:3000
-# 200 = running, 000 = dead
+npm run check
 ```
 
-### Restart when needed
-```bash
-pkill -f "next dev" 2>/dev/null; sleep 1
-npm run dev > /tmp/nextdev.log 2>&1 &
-sleep 8 && curl -s -o /dev/null -w "%{http_code}" http://localhost:3000
-```
+Run `npm run docs:check` when documentation or architecture assumptions change.
 
-### When to restart
-| Situation | Action |
-|---|---|
-| Session start (server may have died) | Check first; restart if not 200 |
-| After `npm install` | Always restart |
-| After `npm run build` | Restart to clear `.next` cache |
-| User reports broken/unstyled page | Restart immediately; tell user to Cmd+Shift+R |
+## Dev Server
 
-### After restart
-Always tell the user: **ブラウザで Cmd+Shift+R（Mac）/ Ctrl+Shift+R（Windows）でハードリロードしてください。**
-
-Do not investigate CSS or Tailwind code until the server is confirmed healthy at HTTP 200.
+- Use `npm run dev` for local hot reload.
+- `npm run dev` clears `.next` before starting so stale HMR chunks do not break local UI.
+- Stop the dev server before `npm run build` or `npm run check`.
+- If the local UI appears unstyled or chunks return 404, restart with `npm run dev` and hard-refresh the browser.
+- Do not debug Tailwind or layout code until the server is confirmed healthy.

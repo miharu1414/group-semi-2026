@@ -1,6 +1,6 @@
 {
   "projectName": "Group Seminar Calendar 2026",
-  "lastReviewed": "2026-06-24",
+  "lastReviewed": "2026-06-25",
   "canonicalDocs": [
     "docs/GOVERNANCE.md",
     "docs/PROJECT_CONTEXT.json",
@@ -37,26 +37,28 @@
     "notices"
   ],
   "seminarFields": {
-    "activity_id": "string — optional; references ACTIVITIES[].id in lib/activity-config.ts. Set only via seed scripts. Empty string when unset (not null). Controls calendar color and InfoModal content.",
-    "start_time": "string — HH:MM format, empty if unset",
-    "end_time": "string — HH:MM format, empty if unset",
-    "custom_label": "string — display label when type='other', empty otherwise"
+    "activity_id": "Optional string. References ACTIVITIES[].id in lib/activity-config.ts. Empty string when unset.",
+    "start_time": "HH:MM string. Empty string when unset.",
+    "end_time": "HH:MM string. Empty string when unset.",
+    "custom_label": "Display label when type is other. Empty string otherwise."
   },
   "activityExtensibility": {
     "configFile": "lib/activity-config.ts",
-    "howToSwitch": "CURRENT_ACTIVITY を ACTIVITIES 配列の別エントリに切り替えるだけ。",
-    "howToAdd": "ACTIVITIES 配列に ActivityConfig オブジェクトを追記し、CURRENT_ACTIVITY を更新する。",
-    "futureMultiActivity": "seminar に activity_id フィールドを追加し、カレンダー・担当一覧で活動ごとに設定を参照する拡張が最小コストで行える。"
+    "howToSwitch": "Change CURRENT_ACTIVITY to another ACTIVITIES entry.",
+    "howToAdd": "Add an ActivityConfig object to ACTIVITIES and update CURRENT_ACTIVITY when needed.",
+    "futureMultiActivity": "Keep activity_id on seminars so calendar and schedule views can select activity-specific configuration with minimal future changes."
   },
   "operationalRules": {
     "commitPushPermission": "Do not commit or push without explicit user instruction.",
     "localDevHotReload": "Use npm run dev for local hot reload. Do not run npm run build while the dev server is running.",
+    "criticalReview": "Challenge user proposals and document tradeoffs.",
     "featureMemoDirectory": "docs/memo",
     "featureMemoFilenamePattern": "YYYY-MM-DD-kebab-case-summary.md",
     "requiredDocTerms": [
       "Do not commit or push without explicit user instruction.",
       "docs/memo",
-      "Do not run npm run build while the dev server is running."
+      "Do not run npm run build while the dev server is running.",
+      "Challenge user proposals and document tradeoffs."
     ]
   },
   "deprecatedClaims": [

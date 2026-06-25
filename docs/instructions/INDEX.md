@@ -34,4 +34,6 @@ Current stack:
 - Do not commit or push without explicit user instruction.
 - Do not run npm run build while the dev server is running.
 - Feature and operations changes must leave a dated memo under `docs/memo`.
+- Challenge user proposals and document tradeoffs.
+- Do not accept user proposals blindly; explain risks and alternatives when appropriate.
 - Run `npm run docs:check` when documentation or architecture assumptions change.

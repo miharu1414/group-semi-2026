@@ -152,7 +152,7 @@ export default function InfoModal({ open, onClose }: Props) {
                 {[
                   { dot: 'bg-indigo-500', label: '輪読ゼミ',  desc: '教科書の輪読' },
                   { dot: 'bg-violet-500', label: '全体ゼミ',  desc: '全体発表・共有' },
-                  { dot: 'bg-teal-500',   label: '研究共有会', desc: '研究進捗発表' },
+                  { dot: 'bg-teal-500',   label: '研究共有', desc: '研究進捗発表' },
                   { dot: 'bg-orange-500', label: 'その他',    desc: '合宿・特別イベントなど' },
                 ].map(({ dot, label, desc }) => (
                   <div key={label} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">

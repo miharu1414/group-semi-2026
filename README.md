@@ -1,6 +1,6 @@
 # Group Seminar Calendar 2026
 
-研究室の輪読ゼミ、全体ゼミ、研究共有会の予定と担当者を管理するWebアプリです。
+研究室の輪読ゼミ、全体ゼミ、研究共有の予定と担当者を管理するWebアプリです。
 
 **Tech Stack:** Next.js 14 + TypeScript + Tailwind CSS + Firebase Admin SDK + Firestore
 

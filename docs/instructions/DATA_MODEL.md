@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | `rinudoku` | 輪読ゼミ | Indigo |
 | `zentai` | 全体ゼミ | Violet |
-| `kenkyu` | 研究共有会 | Teal |
+| `kenkyu` | 研究共有 | Teal |
 
 When adding or changing a seminar type, update:
 

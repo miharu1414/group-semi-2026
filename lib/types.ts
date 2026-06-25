@@ -30,7 +30,7 @@ export const SEMINAR_TYPES: Record<SeminarType, SeminarTypeConfig> = {
     hoverClass: 'hover:bg-violet-200',
   },
   kenkyu: {
-    label: '研究共有会',
+    label: '研究共有',
     shortLabel: '研究',
     bgClass: 'bg-teal-100',
     textClass: 'text-teal-800',

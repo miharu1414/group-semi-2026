@@ -15,7 +15,7 @@ Seminar colors are defined in `lib/types.ts` as `SEMINAR_TYPES`.
 | --- | --- |
 | 輪読ゼミ | Indigo |
 | 全体ゼミ | Violet |
-| 研究共有会 | Teal |
+| 研究共有 | Teal |
 
 ## Layout
 

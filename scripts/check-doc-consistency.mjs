@@ -88,6 +88,22 @@ const docsToScan = [
   ...scanFiles('docs', (file) => file.endsWith('.md')),
 ];
 
+const coreInstructionDocs = [
+  'docs/GOVERNANCE.md',
+  'docs/instructions/INDEX.md',
+  'docs/instructions/AI_WORKFLOW.md',
+  ...context.requiredAgentDocs,
+];
+
+const mojibakePattern = /縺|繧|繝|譛|螳|諡|莠|邂|笏|蟷|髢/;
+
+for (const file of coreInstructionDocs) {
+  const content = requireFile(file);
+  if (mojibakePattern.test(content)) {
+    errors.push(`${file} appears to contain mojibake text`);
+  }
+}
+
 const allowedDeprecatedFiles = new Set([
   'docs/PROJECT_CONTEXT.json',
   'docs/GOVERNANCE.md',
