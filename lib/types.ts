@@ -1,4 +1,4 @@
-export type SeminarType = 'rinudoku' | 'zentai' | 'kenkyu';
+export type SeminarType = 'rinudoku' | 'zentai' | 'kenkyu' | 'other';
 
 export interface SeminarTypeConfig {
   label: string;
@@ -38,6 +38,15 @@ export const SEMINAR_TYPES: Record<SeminarType, SeminarTypeConfig> = {
     dotClass: 'bg-teal-500',
     hoverClass: 'hover:bg-teal-200',
   },
+  other: {
+    label: 'その他',
+    shortLabel: 'その他',
+    bgClass: 'bg-orange-100',
+    textClass: 'text-orange-800',
+    borderClass: 'border-orange-200',
+    dotClass: 'bg-orange-500',
+    hoverClass: 'hover:bg-orange-200',
+  },
 };
 
 export interface Seminar {
@@ -45,6 +54,7 @@ export interface Seminar {
   date: string;
   type: SeminarType;
   title: string;
+  custom_label: string;
   assignee_a: string;
   assignee_b: string[];
   assignee_c: string;
@@ -65,6 +75,7 @@ export interface SeminarFormData {
   date: string;
   type: SeminarType;
   title: string;
+  custom_label: string;
   assignee_a: string;
   assignee_b: string[];
   assignee_c: string;

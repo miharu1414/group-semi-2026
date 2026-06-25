@@ -202,7 +202,7 @@ export default function MemberScheduleModal({ open, members, onClose }: Props) {
                           <td className="py-2.5 px-2">
                             <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border font-medium ${cfg.bgClass} ${cfg.textClass} ${cfg.borderClass}`}>
                               <span className={`w-1.5 h-1.5 rounded-full ${cfg.dotClass}`} />
-                              {cfg.shortLabel}
+                              {seminar.type === 'other' ? (seminar.custom_label || 'その他') : cfg.shortLabel}
                             </span>
                           </td>
                           <td className="py-2.5 px-2 text-gray-800 text-xs sm:text-sm">

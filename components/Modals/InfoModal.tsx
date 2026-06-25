@@ -169,6 +169,29 @@ export default function InfoModal({ open, onClose }: Props) {
               </ol>
             </section>
 
+            {/* カレンダー凡例 */}
+            <section>
+              <h3 className="flex items-center gap-2 text-sm font-bold text-gray-800 mb-2">
+                <ListOrdered size={15} className="text-indigo-500" /> カレンダー凡例
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                {[
+                  { dot: 'bg-indigo-500',  label: '輪読ゼミ',  desc: '教科書の輪読' },
+                  { dot: 'bg-violet-500',  label: '全体ゼミ',  desc: '全体発表・共有' },
+                  { dot: 'bg-teal-500',    label: '研究共有会', desc: '研究進捗発表' },
+                  { dot: 'bg-orange-500',  label: 'その他',    desc: '合宿・特別イベントなど' },
+                ].map(({ dot, label, desc }) => (
+                  <div key={label} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                    <span className={`w-2.5 h-2.5 rounded-full ${dot} shrink-0`} />
+                    <div>
+                      <p className="text-xs font-semibold text-gray-800">{label}</p>
+                      <p className="text-xs text-gray-500">{desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
             {/* 全体メモ */}
             <section>
               <h3 className="flex items-center gap-2 text-sm font-bold text-gray-800 mb-2">

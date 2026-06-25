@@ -87,6 +87,9 @@ export default function DayDetailModal({
                   ...(seminar.assignee_c ? [{ role: 'C', name: seminar.assignee_c }] : []),
                 ];
 
+                const displayLabel = seminar.type === 'other'
+                  ? (seminar.custom_label || 'その他')
+                  : cfg.label;
                 return (
                   <button
                     key={seminar.id}
@@ -101,7 +104,7 @@ export default function DayDetailModal({
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className={`w-2 h-2 rounded-full ${cfg.dotClass} shrink-0`} />
-                        <span className={`text-sm font-bold ${cfg.textClass}`}>{cfg.label}</span>
+                        <span className={`text-sm font-bold ${cfg.textClass}`}>{displayLabel}</span>
                         {seminar.title && (
                           <span className={`text-sm truncate ${cfg.textClass} opacity-75`}>
                             — {seminar.title}

@@ -9,7 +9,12 @@ export async function GET(
     const doc = await db.collection('seminars').doc(params.id).get();
     if (!doc.exists) return Response.json({ error: 'Not found' }, { status: 404 });
     const data = doc.data()!;
-    return Response.json({ id: doc.id, ...data, assignee_b: normalizeAssigneeB(data.assignee_b) });
+    return Response.json({
+      id: doc.id,
+      ...data,
+      assignee_b: normalizeAssigneeB(data.assignee_b),
+      custom_label: (data.custom_label as string) ?? '',
+    });
   } catch (e) {
     console.error('GET /api/seminars/[id] error:', e);
     return Response.json({ error: 'Internal server error' }, { status: 500 });
@@ -29,6 +34,7 @@ export async function PUT(
       date?: string;
       type?: string;
       title?: string;
+      custom_label?: string;
       assignee_a?: string;
       assignee_b?: string[];
       assignee_c?: string;
@@ -36,13 +42,14 @@ export async function PUT(
     };
 
     const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
-    if (body.date      !== undefined) updates.date       = body.date;
-    if (body.type      !== undefined) updates.type       = body.type;
-    if (body.title     !== undefined) updates.title      = body.title;
-    if (body.assignee_a !== undefined) updates.assignee_a = body.assignee_a;
-    if (body.assignee_b !== undefined) updates.assignee_b = body.assignee_b;
-    if (body.assignee_c !== undefined) updates.assignee_c = body.assignee_c;
-    if (body.notes     !== undefined) updates.notes      = body.notes;
+    if (body.date         !== undefined) updates.date         = body.date;
+    if (body.type         !== undefined) updates.type         = body.type;
+    if (body.title        !== undefined) updates.title        = body.title;
+    if (body.custom_label !== undefined) updates.custom_label = body.custom_label;
+    if (body.assignee_a   !== undefined) updates.assignee_a   = body.assignee_a;
+    if (body.assignee_b   !== undefined) updates.assignee_b   = body.assignee_b;
+    if (body.assignee_c   !== undefined) updates.assignee_c   = body.assignee_c;
+    if (body.notes        !== undefined) updates.notes        = body.notes;
     await ref.update(updates);
 
     const updated = await ref.get();

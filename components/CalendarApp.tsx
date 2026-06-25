@@ -174,6 +174,7 @@ export default function CalendarApp() {
             { color: 'bg-indigo-500', label: '輪読ゼミ' },
             { color: 'bg-violet-500', label: '全体ゼミ' },
             { color: 'bg-teal-500',   label: '研究共有' },
+            { color: 'bg-orange-500', label: 'その他' },
           ].map(({ color, label }) => (
             <div key={label} className="flex items-center gap-1.5">
               <span className={`w-2.5 h-2.5 rounded-full ${color} shrink-0`} />

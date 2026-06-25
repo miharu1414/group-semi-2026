@@ -11,6 +11,9 @@ export default function SeminarCard({ seminar, onClick }: Props) {
   const cfg = SEMINAR_TYPES[seminar.type];
   const bNames = normalizeAssigneeB(seminar.assignee_b);
   const hasAssignees = seminar.assignee_a || bNames.length > 0 || seminar.assignee_c;
+  const displayLabel = seminar.type === 'other'
+    ? (seminar.custom_label || 'その他')
+    : cfg.shortLabel;
 
   return (
     <button
@@ -24,7 +27,7 @@ export default function SeminarCard({ seminar, onClick }: Props) {
     >
       <div className="flex items-center gap-1 min-w-0">
         <span className={`w-1.5 h-1.5 rounded-full ${cfg.dotClass} shrink-0`} />
-        <span className="font-semibold truncate">{cfg.shortLabel}</span>
+        <span className="font-semibold truncate">{displayLabel}</span>
         {seminar.title && (
           <span className="text-xs opacity-70 truncate hidden sm:inline">
             {seminar.title}

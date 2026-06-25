@@ -10,7 +10,12 @@ export async function GET(request: Request) {
     type SeminarDoc = { id: string; date: string; assignee_b: string[]; [key: string]: unknown };
     const seminars = snapshot.docs.map((doc) => {
       const data = doc.data() as Record<string, unknown>;
-      return { id: doc.id, ...data, assignee_b: normalizeAssigneeB(data.assignee_b) } as unknown as SeminarDoc;
+      return {
+        id: doc.id,
+        ...data,
+        assignee_b: normalizeAssigneeB(data.assignee_b),
+        custom_label: (data.custom_label as string) ?? '',
+      } as unknown as SeminarDoc;
     });
 
     return Response.json(
@@ -28,6 +33,7 @@ export async function POST(request: Request) {
       date: string;
       type: string;
       title?: string;
+      custom_label?: string;
       assignee_a?: string;
       assignee_b?: string[];
       assignee_c?: string;
@@ -43,6 +49,7 @@ export async function POST(request: Request) {
       date: body.date,
       type: body.type,
       title: body.title ?? '',
+      custom_label: body.custom_label ?? '',
       assignee_a: body.assignee_a ?? '',
       assignee_b: body.assignee_b ?? [],
       assignee_c: body.assignee_c ?? '',

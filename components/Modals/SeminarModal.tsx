@@ -21,6 +21,7 @@ const EMPTY_FORM: SeminarFormData = {
   date: '',
   type: 'rinudoku',
   title: '',
+  custom_label: '',
   assignee_a: '',
   assignee_b: [],
   assignee_c: '',
@@ -50,6 +51,7 @@ export default function SeminarModal({
           date: seminar.date,
           type: seminar.type,
           title: seminar.title,
+          custom_label: seminar.custom_label ?? '',
           assignee_a: seminar.assignee_a,
           assignee_b: normalizeAssigneeB(seminar.assignee_b),
           assignee_c: seminar.assignee_c,
@@ -73,10 +75,7 @@ export default function SeminarModal({
 
   const handleDelete = async () => {
     if (!seminar) return;
-    if (!confirmDelete) {
-      setConfirmDelete(true);
-      return;
-    }
+    if (!confirmDelete) { setConfirmDelete(true); return; }
     setDeleting(true);
     try {
       await onDelete(seminar.id);
@@ -90,15 +89,11 @@ export default function SeminarModal({
     setForm((f) => ({ ...f, [key]: value }));
   };
 
-  // A or C 変更時に残りメンバーを B へ自動セット
   const handleAssigneeAChange = (val: string) => {
     setForm((f) => {
       const next = { ...f, assignee_a: val };
-      // B が未選択のときのみ auto-fill（手動選択を上書きしない）
       if (val && next.assignee_c && next.assignee_b.length === 0) {
-        next.assignee_b = members
-          .map((m) => m.name)
-          .filter((n) => n !== val && n !== next.assignee_c);
+        next.assignee_b = members.map((m) => m.name).filter((n) => n !== val && n !== next.assignee_c);
       }
       return next;
     });
@@ -108,9 +103,7 @@ export default function SeminarModal({
     setForm((f) => {
       const next = { ...f, assignee_c: val };
       if (f.assignee_a && val && f.assignee_b.length === 0) {
-        next.assignee_b = members
-          .map((m) => m.name)
-          .filter((n) => n !== f.assignee_a && n !== val);
+        next.assignee_b = members.map((m) => m.name).filter((n) => n !== f.assignee_a && n !== val);
       }
       return next;
     });
@@ -136,14 +129,11 @@ export default function SeminarModal({
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/40 modal-backdrop z-40 animate-fade-in-up"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 bg-black/40 z-40" onClick={onClose} />
 
-      {/* Panel */}
+      {/* Panel — full screen on mobile, right drawer on sm+ */}
       <div
-        className="fixed right-0 top-0 h-full w-full sm:w-[420px] bg-white shadow-2xl z-50 flex flex-col animate-fade-in-up"
+        className="fixed inset-0 sm:inset-auto sm:right-0 sm:top-0 sm:h-full sm:w-[440px] bg-white shadow-2xl z-50 flex flex-col"
         role="dialog"
         aria-modal="true"
       >
@@ -153,13 +143,12 @@ export default function SeminarModal({
             <h2 className="text-base font-semibold text-gray-900">
               {seminar ? '予定を編集' : '予定を追加'}
             </h2>
-            {displayDate && (
-              <p className="text-xs text-gray-500 mt-0.5">{displayDate}</p>
-            )}
+            {displayDate && <p className="text-xs text-gray-500 mt-0.5">{displayDate}</p>}
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+            aria-label="閉じる"
           >
             <X size={18} />
           </button>
@@ -179,16 +168,16 @@ export default function SeminarModal({
                 required
                 value={form.date}
                 onChange={(e) => set('date', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow"
               />
             </div>
 
-            {/* Type */}
+            {/* Type — 2×2 grid */}
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">
-                ゼミ種別 <span className="text-red-500">*</span>
+                種別 <span className="text-red-500">*</span>
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {(Object.keys(SEMINAR_TYPES) as SeminarType[]).map((t) => {
                   const cfg = SEMINAR_TYPES[t];
                   const selected = form.type === t;
@@ -198,9 +187,9 @@ export default function SeminarModal({
                       type="button"
                       onClick={() => set('type', t)}
                       className={`
-                        relative py-2.5 rounded-xl border-2 text-sm font-semibold transition-all duration-150
+                        py-2.5 rounded-xl border-2 text-sm font-semibold transition-all duration-150
                         ${selected
-                          ? `${cfg.bgClass} ${cfg.textClass} ${cfg.borderClass} shadow-sm scale-105`
+                          ? `${cfg.bgClass} ${cfg.textClass} ${cfg.borderClass} shadow-sm scale-[1.03]`
                           : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
                         }
                       `}
@@ -211,6 +200,17 @@ export default function SeminarModal({
                   );
                 })}
               </div>
+
+              {/* カスタムラベル（その他のとき表示） */}
+              {form.type === 'other' && (
+                <input
+                  type="text"
+                  value={form.custom_label}
+                  onChange={(e) => set('custom_label', e.target.value)}
+                  placeholder="イベント名を入力（例: 夏合宿）"
+                  className="mt-2 w-full rounded-lg border border-orange-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent placeholder-gray-300 transition-shadow"
+                />
+              )}
             </div>
 
             {/* Title */}
@@ -222,8 +222,8 @@ export default function SeminarModal({
                 type="text"
                 value={form.title}
                 onChange={(e) => set('title', e.target.value)}
-                placeholder="例: 第3章まとめ"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-300 transition-shadow"
+                placeholder="例: 第3章まとめ、1日目"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-300 transition-shadow"
               />
             </div>
 
@@ -235,108 +235,73 @@ export default function SeminarModal({
               <div className="space-y-2.5">
                 {/* A */}
                 <div className="flex items-center gap-2.5">
-                  <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-600 text-xs font-bold flex items-center justify-center shrink-0 uppercase">
-                    a
-                  </span>
+                  <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-600 text-xs font-bold flex items-center justify-center shrink-0">A</span>
                   {memberOptions.length > 0 ? (
                     <select
                       value={form.assignee_a}
                       onChange={(e) => handleAssigneeAChange(e.target.value)}
-                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow bg-white"
+                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow bg-white"
                     >
                       <option value="">未設定</option>
-                      {memberOptions.map((name) => (
-                        <option key={name} value={name}>{name}</option>
-                      ))}
+                      {memberOptions.map((name) => <option key={name} value={name}>{name}</option>)}
                     </select>
                   ) : (
-                    <input
-                      type="text"
-                      value={form.assignee_a}
-                      onChange={(e) => handleAssigneeAChange(e.target.value)}
-                      placeholder="担当者 A"
-                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-300 transition-shadow"
-                    />
+                    <input type="text" value={form.assignee_a} onChange={(e) => handleAssigneeAChange(e.target.value)} placeholder="担当者 A"
+                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-300 transition-shadow" />
                   )}
                 </div>
 
-                {/* B — 複数選択 */}
+                {/* B — 複数選択チップ */}
                 <div className="flex items-start gap-2.5">
-                  <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-600 text-xs font-bold flex items-center justify-center shrink-0 uppercase mt-1">
-                    b
-                  </span>
+                  <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-600 text-xs font-bold flex items-center justify-center shrink-0 mt-1">B</span>
                   {memberOptions.length > 0 ? (
                     <div className="flex-1">
                       <div className="flex flex-wrap gap-1.5">
                         {memberOptions.map((name) => {
-                          const selected = form.assignee_b.includes(name);
+                          const sel = form.assignee_b.includes(name);
                           return (
-                            <button
-                              key={name}
-                              type="button"
-                              onClick={() => toggleAssigneeB(name)}
-                              className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${
-                                selected
-                                  ? 'bg-indigo-100 text-indigo-800 border-indigo-300 shadow-sm'
-                                  : 'bg-white text-gray-500 border-gray-300 hover:border-gray-400'
+                            <button key={name} type="button" onClick={() => toggleAssigneeB(name)}
+                              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all touch-manipulation ${
+                                sel ? 'bg-indigo-100 text-indigo-800 border-indigo-300 shadow-sm' : 'bg-white text-gray-500 border-gray-300 hover:border-gray-400'
                               }`}
-                            >
-                              {name}
-                            </button>
+                            >{name}</button>
                           );
                         })}
                       </div>
                       {form.assignee_b.length > 0 && (
-                        <p className="text-xs text-gray-400 mt-1">
-                          選択中: {form.assignee_b.join('・')}
-                        </p>
+                        <p className="text-xs text-gray-400 mt-1">選択中: {form.assignee_b.join('・')}</p>
                       )}
                     </div>
                   ) : (
-                    <input
-                      type="text"
-                      value={form.assignee_b.join('、')}
-                      onChange={(e) =>
-                        set('assignee_b', e.target.value ? e.target.value.split('、') : [])
-                      }
-                      placeholder="担当者 B（複数可）"
-                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-300 transition-shadow"
-                    />
+                    <input type="text" value={form.assignee_b.join('、')}
+                      onChange={(e) => set('assignee_b', e.target.value ? e.target.value.split('、') : [])}
+                      placeholder="担当者 B（複数、読点区切り）"
+                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-300 transition-shadow" />
                   )}
                 </div>
 
                 {/* C */}
                 <div className="flex items-center gap-2.5">
-                  <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-600 text-xs font-bold flex items-center justify-center shrink-0 uppercase">
-                    c
-                  </span>
+                  <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-600 text-xs font-bold flex items-center justify-center shrink-0">C</span>
                   {memberOptions.length > 0 ? (
                     <select
                       value={form.assignee_c}
                       onChange={(e) => handleAssigneeCChange(e.target.value)}
-                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow bg-white"
+                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow bg-white"
                     >
                       <option value="">未設定</option>
-                      {memberOptions.map((name) => (
-                        <option key={name} value={name}>{name}</option>
-                      ))}
+                      {memberOptions.map((name) => <option key={name} value={name}>{name}</option>)}
                     </select>
                   ) : (
-                    <input
-                      type="text"
-                      value={form.assignee_c}
-                      onChange={(e) => handleAssigneeCChange(e.target.value)}
-                      placeholder="担当者 C"
-                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-300 transition-shadow"
-                    />
+                    <input type="text" value={form.assignee_c} onChange={(e) => handleAssigneeCChange(e.target.value)} placeholder="担当者 C"
+                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-300 transition-shadow" />
                   )}
                 </div>
               </div>
-
               <p className="text-xs text-gray-400 mt-1.5">
                 {memberOptions.length === 0
                   ? 'ヘッダーの「メンバー管理」からメンバーを追加するとドロップダウンで選択できます'
-                  : 'A・C を選ぶと B に残りのメンバーが自動入力されます'}
+                  : 'A・C を選択すると、B に残りのメンバーが自動で入力されます（B が空のとき）'}
               </p>
             </div>
 
@@ -366,36 +331,21 @@ export default function SeminarModal({
         {/* Footer */}
         <div className="border-t border-gray-200 px-5 py-4 flex items-center justify-between shrink-0">
           {seminar ? (
-            <button
-              type="button"
-              onClick={handleDelete}
-              disabled={deleting}
-              className={`
-                flex items-center gap-2 text-sm px-3 py-2 rounded-lg transition-all
-                ${confirmDelete
-                  ? 'bg-red-600 text-white hover:bg-red-700'
-                  : 'text-red-500 hover:bg-red-50'
-                }
-              `}
+            <button type="button" onClick={handleDelete} disabled={deleting}
+              className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg transition-all ${
+                confirmDelete ? 'bg-red-600 text-white hover:bg-red-700' : 'text-red-500 hover:bg-red-50'
+              }`}
             >
               <Trash2 size={15} />
               {confirmDelete ? '本当に削除しますか？' : '削除'}
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={onClose}
+            <button type="button" onClick={onClose}
               className="text-sm text-gray-500 hover:text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              キャンセル
-            </button>
+            >キャンセル</button>
           )}
-
-          <button
-            type="button"
-            disabled={saving || !form.date}
-            onClick={handleSubmit}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+          <button type="button" disabled={saving || !form.date} onClick={handleSubmit}
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-sm"
           >
             <Save size={15} />
             {saving ? '保存中...' : '保存する'}
