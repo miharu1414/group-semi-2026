@@ -177,8 +177,8 @@ export default function MemberScheduleModal({ open, members, onClose }: Props) {
                 }`}
               >
                 {showPast
-                  ? '過去を含めて表示中'
-                  : `今日以降を表示${pastCount > 0 ? `（過去 ${pastCount} 件を非表示）` : ''}`}
+                  ? `全期間を表示中${pastCount > 0 ? `（過去 ${pastCount} 件を含む）` : ''}`
+                  : `今日以降を表示中${pastCount > 0 ? `（過去 ${pastCount} 件を非表示）` : ''}`}
               </button>
             </div>
           )}
