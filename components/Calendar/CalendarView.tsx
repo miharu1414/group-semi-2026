@@ -133,13 +133,15 @@ export default function CalendarView({
             <div
               key={dateStr}
               className={`
-                relative border-r border-b border-gray-200 transition-colors cursor-pointer touch-manipulation
+                relative border-r border-b border-gray-200 transition-colors touch-manipulation
                 ${hasPopup ? 'overflow-visible' : 'overflow-hidden'}
                 ${!isCurrentMonth
-                  ? 'bg-gray-50 active:bg-gray-100'
-                  : isCurrentDay
-                  ? isHovered ? 'bg-indigo-100/70' : 'bg-indigo-50 active:bg-indigo-100'
-                  : isHovered ? 'bg-indigo-50/30' : 'bg-white active:bg-indigo-50/50'
+                  ? 'bg-gray-50 cursor-default'
+                  : `cursor-pointer ${
+                      isCurrentDay
+                        ? isHovered ? 'bg-indigo-100/70' : 'bg-indigo-50 active:bg-indigo-100'
+                        : isHovered ? 'bg-indigo-50/30' : 'bg-white active:bg-indigo-50/50'
+                    }`
                 }
                 ${isCurrentDay ? 'border-l-2 border-l-indigo-400' : ''}
               `}
@@ -183,7 +185,7 @@ export default function CalendarView({
                       今日
                     </span>
                   )}
-                  {earliestTime && (
+                  {isCurrentMonth && earliestTime && (
                     <span className="text-[9px] sm:text-[10px] text-indigo-500 font-semibold tabular-nums leading-none">
                       {earliestTime}〜
                     </span>
@@ -207,7 +209,7 @@ export default function CalendarView({
               </div>
 
               {/* Mobile: readable compact event chips (tap day to see details) */}
-              {isCurrentMonth && daySeminars.length > 0 && (
+              {daySeminars.length > 0 && (
                 <div className="sm:hidden mt-1 space-y-0.5 px-1 pb-1">
                   {daySeminars.slice(0, 2).map((seminar) => {
                     const cfg = getEventConfig(seminar);
@@ -217,16 +219,37 @@ export default function CalendarView({
                     return (
                       <div
                         key={seminar.id}
-                        className={`min-w-0 rounded border px-1 py-0.5 leading-none ${cfg.bgClass} ${cfg.borderClass}`}
+                        className={`
+                          min-w-0 rounded border px-1 py-0.5 leading-none
+                          ${isCurrentMonth
+                            ? `${cfg.bgClass} ${cfg.borderClass}`
+                            : 'bg-gray-100/50 border-gray-200/60 opacity-60'
+                          }
+                        `}
                       >
                         <div className="flex items-center gap-0.5 min-w-0">
-                          <span className={`w-1.5 h-1.5 rounded-full ${cfg.dotClass} shrink-0`} />
-                          <span className={`truncate text-[10px] font-semibold ${cfg.textClass}`}>
+                          <span
+                            className={`
+                              w-1.5 h-1.5 rounded-full shrink-0
+                              ${isCurrentMonth ? cfg.dotClass : 'bg-gray-300'}
+                            `}
+                          />
+                          <span
+                            className={`
+                              truncate text-[10px] font-semibold
+                              ${isCurrentMonth ? cfg.textClass : 'text-gray-400'}
+                            `}
+                          >
                             {label}
                           </span>
                         </div>
                         {seminar.title && (
-                          <p className={`mt-0.5 truncate text-[9px] ${cfg.textClass} opacity-70`}>
+                          <p
+                            className={`
+                              mt-0.5 truncate text-[9px]
+                              ${isCurrentMonth ? `${cfg.textClass} opacity-70` : 'text-gray-400/80'}
+                            `}
+                          >
                             {seminar.title}
                           </p>
                         )}
@@ -234,7 +257,7 @@ export default function CalendarView({
                     );
                   })}
                   {daySeminars.length > 2 && (
-                    <div className="text-[10px] font-semibold text-gray-500 leading-none px-1 pt-0.5">
+                    <div className="text-[10px] font-semibold text-gray-400 leading-none px-1 pt-0.5">
                       +{daySeminars.length - 2}件
                     </div>
                   )}
@@ -248,6 +271,7 @@ export default function CalendarView({
                     <div key={seminar.id}>
                       <SeminarCard
                         seminar={seminar}
+                        disabled={!isCurrentMonth}
                         onClick={(e) => {
                           e.stopPropagation();
                           onSeminarClick(seminar);
