@@ -64,46 +64,46 @@ export default function CalendarView({
     <div className="flex flex-col">
       <div className="shrink-0">
         {/* Month Navigation Header */}
-        <div className="bg-white border-b border-gray-200 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3">
+        <div className="bg-white/70 backdrop-blur-sm border-b border-slate-200/50 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3">
           <button
             onClick={onToday}
-            className="text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 sm:py-1.5 rounded-lg border border-gray-300 transition-colors shrink-0"
+            className="text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 px-3 py-2 sm:py-1.5 rounded-lg border border-slate-300 transition-colors shrink-0 bg-white/40 backdrop-blur-xs"
           >
             今日
           </button>
           <div className="flex items-center gap-1">
             <button
               onClick={onPrevMonth}
-              className="p-2.5 sm:p-1.5 rounded-lg hover:bg-gray-100 active:bg-gray-200 text-gray-600 hover:text-gray-900 transition-colors touch-manipulation"
+              className="p-2.5 sm:p-1.5 rounded-lg hover:bg-white/60 active:bg-white/80 text-slate-600 hover:text-slate-900 transition-colors touch-manipulation"
               aria-label="前の月"
             >
               <ChevronLeft size={18} />
             </button>
             <button
               onClick={onNextMonth}
-              className="p-2.5 sm:p-1.5 rounded-lg hover:bg-gray-100 active:bg-gray-200 text-gray-600 hover:text-gray-900 transition-colors touch-manipulation"
+              className="p-2.5 sm:p-1.5 rounded-lg hover:bg-white/60 active:bg-white/80 text-slate-600 hover:text-slate-900 transition-colors touch-manipulation"
               aria-label="次の月"
             >
               <ChevronRight size={18} />
             </button>
           </div>
-          <h2 className="text-base sm:text-lg font-semibold text-gray-900 min-w-0 truncate">
+          <h2 className="text-base sm:text-lg font-bold text-slate-800 min-w-0 truncate">
             {format(currentMonth, 'yyyy年 M月', { locale: ja })}
           </h2>
           {loading && (
-            <span className="ml-auto hidden min-[360px]:inline text-xs text-gray-400 animate-pulse">読み込み中...</span>
+            <span className="ml-auto hidden min-[360px]:inline text-xs text-indigo-500 font-medium animate-pulse">読み込み中...</span>
           )}
         </div>
 
         {/* Weekday Header */}
-        <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
+        <div className="grid grid-cols-7 bg-slate-100/50 backdrop-blur-xs border-b border-slate-200/60">
           {WEEKDAYS.map((day, i) => (
             <div
               key={day}
-              className={`py-2 text-center text-xs font-semibold tracking-wide
-                ${i === 0 ? 'text-red-500' : ''}
-                ${i === 6 ? 'text-blue-500' : ''}
-                ${i > 0 && i < 6 ? 'text-gray-500' : ''}
+              className={`py-2 text-center text-xs font-bold tracking-wide
+                ${i === 0 ? 'text-red-500/90' : ''}
+                ${i === 6 ? 'text-blue-500/90' : ''}
+                ${i > 0 && i < 6 ? 'text-slate-500' : ''}
               `}
             >
               {day}
@@ -113,7 +113,7 @@ export default function CalendarView({
       </div>
 
       {/* Calendar Grid — fixed row height so cells never expand beyond clamp value */}
-      <div className="calendar-month-grid grid grid-cols-7 border-l border-t border-gray-200">
+      <div className="calendar-month-grid grid grid-cols-7 border-l border-t border-slate-200/60">
         {days.map((day) => {
           const dateStr = format(day, 'yyyy-MM-dd');
           const isCurrentMonth = isSameMonth(day, currentMonth);
@@ -133,17 +133,17 @@ export default function CalendarView({
             <div
               key={dateStr}
               className={`
-                relative border-r border-b border-gray-200 transition-colors touch-manipulation
+                relative border-r border-b border-slate-200/60 transition-all duration-150 touch-manipulation
                 ${hasPopup ? 'overflow-visible' : 'overflow-hidden'}
                 ${!isCurrentMonth
-                  ? 'bg-gray-50 cursor-default'
+                  ? 'bg-slate-50/40 cursor-default text-slate-400/60'
                   : `cursor-pointer ${
                       isCurrentDay
-                        ? isHovered ? 'bg-indigo-100/70' : 'bg-indigo-50 active:bg-indigo-100'
-                        : isHovered ? 'bg-indigo-50/30' : 'bg-white active:bg-indigo-50/50'
+                        ? isHovered ? 'bg-indigo-100/40' : 'bg-indigo-50/30 active:bg-indigo-100/30'
+                        : isHovered ? 'bg-slate-50/70' : 'bg-white/60 active:bg-slate-100/40'
                     }`
                 }
-                ${isCurrentDay ? 'border-l-2 border-l-indigo-400' : ''}
+                ${isCurrentDay ? 'border-l-2 border-l-indigo-500' : ''}
               `}
               style={{ zIndex: hasPopup ? 20 : undefined }}
               onMouseMove={(e) => {

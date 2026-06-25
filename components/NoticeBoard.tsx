@@ -73,15 +73,15 @@ export default function NoticeBoard() {
   const cancelEdit = () => setEditingId(null);
 
   return (
-    <section className="border-t border-gray-200 bg-gray-50 shrink-0 max-h-[28vh] flex flex-col">
+    <section className="border-t border-slate-200/80 bg-slate-50/60 backdrop-blur-md shrink-0 max-h-[28vh] flex flex-col">
       {/* Fixed header */}
       <div className="px-4 sm:px-6 pt-3 pb-2 flex items-center justify-between shrink-0">
-        <h2 className="text-sm font-semibold text-gray-700">
+        <h2 className="text-sm font-bold text-slate-700">
           メモ・連絡事項
         </h2>
         <button
           onClick={() => { setAdding(true); setEditingId(null); }}
-          className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 active:bg-indigo-100 px-2 py-2 sm:py-1 rounded-lg transition-colors touch-manipulation"
+          className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50/60 active:bg-indigo-100/60 px-2 py-2 sm:py-1 rounded-lg transition-colors touch-manipulation"
         >
           <Plus size={13} />
           追加
@@ -103,20 +103,20 @@ export default function NoticeBoard() {
               }}
               rows={2}
               placeholder="メモ・連絡事項を入力（Ctrl/Cmd+Enter で保存）"
-              className="flex-1 rounded-lg border border-indigo-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none placeholder-gray-300 bg-white"
+              className="flex-1 rounded-lg border border-indigo-200/80 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none placeholder-slate-300 bg-white"
             />
             <div className="flex flex-col gap-1">
               <button
                 onClick={handleAdd}
                 disabled={saving || !newText.trim()}
-                className="p-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white transition-colors"
+                className="p-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white transition-colors shadow-sm"
                 aria-label="保存"
               >
                 <Check size={14} />
               </button>
               <button
                 onClick={() => { setAdding(false); setNewText(''); }}
-                className="p-2 rounded-lg hover:bg-gray-200 text-gray-500 transition-colors"
+                className="p-2 rounded-lg hover:bg-slate-200/60 text-slate-500 transition-colors"
                 aria-label="キャンセル"
               >
                 <X size={14} />
@@ -127,15 +127,15 @@ export default function NoticeBoard() {
 
         {/* Notice list */}
         {loading ? (
-          <p className="text-xs text-gray-400 animate-pulse py-2">読み込み中...</p>
+          <p className="text-xs text-slate-400 animate-pulse py-2">読み込み中...</p>
         ) : notices.length === 0 && !adding ? (
-          <p className="text-xs text-gray-400 py-2">メモ・連絡事項はありません。「追加」から記入できます。</p>
+          <p className="text-xs text-slate-400 py-2">メモ・連絡事項はありません。「追加」から記入できます。</p>
         ) : (
           <ul className="space-y-2">
             {notices.map((notice) => (
               <li
                 key={notice.id}
-                className="group/item flex items-start gap-2 bg-white rounded-xl border border-gray-200 px-3 py-2.5 hover:border-gray-300 transition-colors"
+                className="group/item flex items-start gap-2 bg-white/90 rounded-xl border border-slate-200/80 px-3 py-2.5 shadow-xs hover:border-indigo-200 hover:shadow-sm transition-all duration-150"
               >
                 {editingId === notice.id ? (
                   <>
