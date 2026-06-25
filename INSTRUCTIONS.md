@@ -16,7 +16,7 @@ This is the entry point for AI agents working in this repository.
 - Persist data in Firestore.
 - Store Firebase service account values in `.env.local`; never commit them.
 - Do not add personal setup scripts such as `.ps1` or `.bat`.
-- Do not commit or push without explicit user instruction.
+- Do not commit or push without explicit user instruction. (This applies to the immediate user prompt for each turn; never perform commits/pushes automatically based on past prompts).
 - Do not run npm run build while the dev server is running.
 - When implementing a feature or changing project operations, add a memo under `docs/memo` named `YYYY-MM-DD-kebab-case-summary.md`.
 - Challenge user proposals and document tradeoffs.
