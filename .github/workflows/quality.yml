@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - develop
 
 jobs:
   docs-and-lint:
@@ -16,12 +15,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Enforce branch flow (PR destination main must come from develop)
-        if: github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref != 'develop'
-        run: |
-          echo "::error::Pull requests to main branch must originate from develop branch. (Your source is '${{ github.head_ref }}')"
-          exit 1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

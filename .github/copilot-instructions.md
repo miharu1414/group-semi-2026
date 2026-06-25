@@ -22,7 +22,7 @@ Group Seminar Calendar 2026 is a Next.js 14 + TypeScript + Tailwind CSS app back
 - Do not commit `.env.local`, Firebase service account JSON, or private keys.
 - Do not restore deprecated database or setup assumptions.
 - Do not commit or push without explicit user instruction. (This applies to the immediate user prompt for each turn; never perform commits/pushes automatically based on past prompts).
-- **Branch Synchronization Rule**: Always pull the latest changes on `main` and sync local `develop` and `main` branches by running `git fetch origin` followed by `git checkout <branch> && git rebase origin/main` before starting work or after merging pull requests to prevent branch drift.
+- **Branch Synchronization Rule**: Always pull the latest changes on `main` and sync local `main` branch by running `git fetch origin` followed by `git checkout main && git rebase origin/main` before starting work or after merging pull requests to prevent branch drift.
 - Do not run npm run build while the dev server is running.
 - When implementing a feature or changing project operations, add a memo under `docs/memo` named `YYYY-MM-DD-kebab-case-summary.md`.
 - Challenge user proposals and document tradeoffs.
