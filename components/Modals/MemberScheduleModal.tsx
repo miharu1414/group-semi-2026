@@ -6,6 +6,7 @@ import { ja } from 'date-fns/locale';
 import { X, User, CalendarDays } from 'lucide-react';
 import { Seminar, Member, SEMINAR_TYPES, normalizeAssigneeB } from '@/lib/types';
 import { getSeminars } from '@/lib/api';
+import { CURRENT_ACTIVITY } from '@/lib/activity-config';
 
 interface Props {
   open: boolean;
@@ -13,17 +14,22 @@ interface Props {
   onClose: () => void;
 }
 
-type RoleLabel = 'A（輪読）' | 'B（関連研究）' | 'C（コラム）';
+const RL = {
+  a: `A（${CURRENT_ACTIVITY.roles.a.short}）`,
+  b: `B（${CURRENT_ACTIVITY.roles.b.short}）`,
+  c: `C（${CURRENT_ACTIVITY.roles.c.short}）`,
+} as const;
+type RoleLabel = typeof RL[keyof typeof RL];
 
 interface Row {
   seminar: Seminar;
   role: RoleLabel;
 }
 
-const ROLE_STYLE: Record<RoleLabel, string> = {
-  'A（輪読）':    'bg-indigo-100 text-indigo-800 border-indigo-200',
-  'B（関連研究）': 'bg-violet-100 text-violet-800 border-violet-200',
-  'C（コラム）':  'bg-teal-100  text-teal-800  border-teal-200',
+const ROLE_STYLE: Record<string, string> = {
+  [RL.a]: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+  [RL.b]: 'bg-violet-100 text-violet-800 border-violet-200',
+  [RL.c]: 'bg-teal-100  text-teal-800  border-teal-200',
 };
 
 function getRoleRows(seminars: Seminar[], name: string): Row[] {
@@ -31,9 +37,9 @@ function getRoleRows(seminars: Seminar[], name: string): Row[] {
   for (const s of seminars) {
     const bNames = normalizeAssigneeB(s.assignee_b);
 
-    if (s.assignee_a === name) rows.push({ seminar: s, role: 'A（輪読）' });
-    if (bNames.includes(name))  rows.push({ seminar: s, role: 'B（関連研究）' });
-    if (s.assignee_c === name)  rows.push({ seminar: s, role: 'C（コラム）' });
+    if (s.assignee_a === name) rows.push({ seminar: s, role: RL.a });
+    if (bNames.includes(name))  rows.push({ seminar: s, role: RL.b });
+    if (s.assignee_c === name)  rows.push({ seminar: s, role: RL.c });
   }
   return rows.sort((a, b) => a.seminar.date.localeCompare(b.seminar.date));
 }
@@ -139,9 +145,9 @@ export default function MemberScheduleModal({ open, members, onClose }: Props) {
             <div className="px-5 pb-3 flex flex-wrap gap-2 shrink-0">
               {(
                 [
-                  { label: 'A（輪読）',    count: counts.A, cls: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
-                  { label: 'B（関連研究）', count: counts.B, cls: 'bg-violet-50 text-violet-700 border-violet-200' },
-                  { label: 'C（コラム）',  count: counts.C, cls: 'bg-teal-50  text-teal-700  border-teal-200' },
+                  { label: RL.a, count: counts.A, cls: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+                  { label: RL.b, count: counts.B, cls: 'bg-violet-50 text-violet-700 border-violet-200' },
+                  { label: RL.c, count: counts.C, cls: 'bg-teal-50  text-teal-700  border-teal-200' },
                 ] as const
               ).map(({ label, count, cls }) =>
                 count > 0 ? (

@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { X, Trash2, Save } from 'lucide-react';
 import { Seminar, SeminarFormData, SeminarType, SEMINAR_TYPES, Member, normalizeAssigneeB } from '@/lib/types';
+import { CURRENT_ACTIVITY } from '@/lib/activity-config';
 
 interface Props {
   open: boolean;
@@ -253,7 +254,7 @@ export default function SeminarModal({
                 type="text"
                 value={form.title}
                 onChange={(e) => set('title', e.target.value)}
-                placeholder="例: 第3章まとめ、1日目"
+                placeholder={CURRENT_ACTIVITY.titlePlaceholder ?? '例: タイトル・章番号など'}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-300 transition-shadow"
               />
             </div>

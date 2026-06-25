@@ -26,6 +26,7 @@
   ],
   "sourceOfTruth": {
     "dataTypes": "lib/types.ts",
+    "activityConfig": "lib/activity-config.ts",
     "firebaseAdmin": "lib/firebase-admin.ts",
     "apiRoutes": "app/api",
     "uiComponents": "components"
@@ -34,6 +35,12 @@
     "seminars",
     "members"
   ],
+  "activityExtensibility": {
+    "configFile": "lib/activity-config.ts",
+    "howToSwitch": "CURRENT_ACTIVITY を ACTIVITIES 配列の別エントリに切り替えるだけ。",
+    "howToAdd": "ACTIVITIES 配列に ActivityConfig オブジェクトを追記し、CURRENT_ACTIVITY を更新する。",
+    "futureMultiActivity": "seminar に activity_id フィールドを追加し、カレンダー・担当一覧で活動ごとに設定を参照する拡張が最小コストで行える。"
+  },
   "operationalRules": {
     "commitPushPermission": "Do not commit or push without explicit user instruction.",
     "featureMemoDirectory": "docs/memo",
