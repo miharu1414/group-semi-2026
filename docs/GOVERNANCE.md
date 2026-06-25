@@ -48,7 +48,7 @@ For a full local verification, stop the dev server first, then run:
 npm run check
 ```
 
-GitHub Actions runs the `Quality Gate` on pull requests and pushes to `main`.
+GitHub Actions runs the `Quality Gate` on pull requests and pushes to `main` and `develop`.
 
 `npm run docs:check` verifies:
 

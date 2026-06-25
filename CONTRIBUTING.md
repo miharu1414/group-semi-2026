@@ -27,10 +27,11 @@ npm run check
 
 ## Branch And Review Policy
 
-- `main` is protected.
-- Pull requests are required for changes to `main`.
-- Code owner review is required.
-- `@miharu1414` is the code owner for the repository.
+- Both `main` and `develop` branches are protected.
+- The standard workflow is to create a feature branch (`feature/your-feature-name`), open a pull request to `develop`, and merge it once verified.
+- Once features are stable in `develop`, a pull request is opened from `develop` to `main` to release changes.
+- Pull requests require approval before merge. Repository owner (`@miharu1414`) self-approval is permitted to enable solo administrative/development workflows.
+- Code owner review is required. `@miharu1414` is the code owner for the repository.
 - Contributors should expect review comments about design, UI/UX, maintainability, security, and documentation consistency.
 
 ## Local Development
