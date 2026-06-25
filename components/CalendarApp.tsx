@@ -21,6 +21,7 @@ function sortSeminars(items: Seminar[]) {
 
 export default function CalendarApp() {
   const [currentMonth, setCurrentMonth] = useState<Date>(startOfMonth(new Date()));
+  const [slideDir, setSlideDir] = useState<'prev' | 'next'>('next');
   const [seminars, setSeminars] = useState<Seminar[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,6 +76,7 @@ export default function CalendarApp() {
 
   // ── Calendar navigation ──────────────────────────────
   const handlePrevMonth = () => {
+    setSlideDir('prev');
     setCurrentMonth((m) => {
       const d = new Date(m);
       d.setMonth(d.getMonth() - 1);
@@ -83,6 +85,7 @@ export default function CalendarApp() {
   };
 
   const handleNextMonth = () => {
+    setSlideDir('next');
     setCurrentMonth((m) => {
       const d = new Date(m);
       d.setMonth(d.getMonth() + 1);
@@ -91,7 +94,9 @@ export default function CalendarApp() {
   };
 
   const handleToday = () => {
-    setCurrentMonth(startOfMonth(new Date()));
+    const today = startOfMonth(new Date());
+    setSlideDir(today >= currentMonth ? 'next' : 'prev');
+    setCurrentMonth(today);
   };
 
   // ── Day Detail Modal ─────────────────────────────────
@@ -274,6 +279,7 @@ export default function CalendarApp() {
           onDayClick={handleDayClick}
           onQuickAdd={handleQuickAdd}
           onSeminarClick={handleSeminarClick}
+          slideDir={slideDir}
         />
         <NoticeBoard />
       </main>

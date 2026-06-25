@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   format,
   startOfMonth,
@@ -28,9 +28,16 @@ interface Props {
   onDayClick: (dateStr: string) => void;
   onQuickAdd: (dateStr: string) => void;
   onSeminarClick: (seminar: Seminar) => void;
+  /** Direction the new month slides in from (for CSS animation). */
+  slideDir?: 'prev' | 'next';
 }
 
 const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
+
+/** Min horizontal distance (px) to trigger swipe. */
+const SWIPE_THRESHOLD = 48;
+/** Min horizontal velocity (px/ms) — triggers even for short fast flicks. */
+const SWIPE_VELOCITY = 0.25;
 
 export default function CalendarView({
   currentMonth,
@@ -42,8 +49,77 @@ export default function CalendarView({
   onDayClick,
   onQuickAdd,
   onSeminarClick,
+  slideDir = 'next',
 }: Props) {
   const [hoveredDate, setHoveredDate] = useState<string | null>(null);
+
+  // ── Swipe gesture state ──────────────────────────────────────────────────
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const touchStartTime = useRef<number | null>(null);
+  const swipeLocked = useRef<'horizontal' | 'vertical' | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    touchStartTime.current = Date.now();
+    swipeLocked.current = null;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const dx = e.touches[0].clientX - touchStartX.current;
+    const dy = e.touches[0].clientY - touchStartY.current;
+
+    // Determine direction lock on first meaningful movement
+    if (!swipeLocked.current) {
+      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+        swipeLocked.current = Math.abs(dx) > Math.abs(dy) ? 'horizontal' : 'vertical';
+      }
+    }
+
+    if (swipeLocked.current === 'horizontal') {
+      // Damped drag — tactile feedback without committing
+      setSwipeOffset(dx * 0.28);
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (
+      touchStartX.current === null ||
+      touchStartY.current === null ||
+      touchStartTime.current === null
+    ) return;
+
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dt = Math.max(1, Date.now() - touchStartTime.current);
+    const vx = Math.abs(dx) / dt;
+
+    // Clear drag immediately; month change (if any) triggers slide animation
+    setSwipeOffset(0);
+
+    if (swipeLocked.current === 'horizontal') {
+      const triggered = Math.abs(dx) > SWIPE_THRESHOLD || vx > SWIPE_VELOCITY;
+      if (triggered) {
+        if (dx > 0) onPrevMonth();
+        else onNextMonth();
+      }
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+    touchStartTime.current = null;
+    swipeLocked.current = null;
+  };
+
+  const handleTouchCancel = () => {
+    setSwipeOffset(0);
+    touchStartX.current = null;
+    touchStartY.current = null;
+    touchStartTime.current = null;
+    swipeLocked.current = null;
+  };
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -60,8 +136,19 @@ export default function CalendarView({
     items.sort(compareSeminarsWithinDay);
   });
 
+  // Grid remounts when month changes → CSS slide animation replays
+  const gridKey = format(currentMonth, 'yyyy-MM');
+  const gridAnimClass = slideDir === 'next' ? 'cal-slide-next' : 'cal-slide-prev';
+
   return (
-    <div className="flex flex-col">
+    <div
+      className="flex flex-col select-none"
+      style={{ touchAction: 'pan-y' }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchCancel}
+    >
       <div className="shrink-0">
         {/* Month Navigation Header */}
         <div className="bg-white/70 backdrop-blur-sm border-b border-slate-200/50 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3">
@@ -112,8 +199,16 @@ export default function CalendarView({
         </div>
       </div>
 
-      {/* Calendar Grid — fixed row height so cells never expand beyond clamp value */}
-      <div className="calendar-month-grid grid grid-cols-7 border-l border-t border-slate-200/60">
+      {/* Calendar Grid — remounts on month change to replay slide animation.
+          swipeOffset gives real-time drag feedback while finger moves.         */}
+      <div
+        key={gridKey}
+        className={`calendar-month-grid grid grid-cols-7 border-l border-t border-slate-200/60 ${gridAnimClass}`}
+        style={{
+          transform: swipeOffset !== 0 ? `translateX(${swipeOffset}px)` : undefined,
+          willChange: swipeOffset !== 0 ? 'transform' : 'auto',
+        }}
+      >
         {days.map((day) => {
           const dateStr = format(day, 'yyyy-MM-dd');
           const isCurrentMonth = isSameMonth(day, currentMonth);
@@ -185,8 +280,9 @@ export default function CalendarView({
                       今日
                     </span>
                   )}
+                  {/* Mobile only: time hint (chips show type/title; desktop SeminarCard shows time) */}
                   {isCurrentMonth && earliestTime && (
-                    <span className="text-[9px] sm:text-[10px] text-indigo-500 font-semibold tabular-nums leading-none">
+                    <span className="sm:hidden text-[9px] text-indigo-500 font-semibold tabular-nums leading-none">
                       {earliestTime}〜
                     </span>
                   )}
