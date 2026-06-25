@@ -21,7 +21,7 @@ function sortSeminars(items: Seminar[]) {
 
 export default function CalendarApp() {
   const [currentMonth, setCurrentMonth] = useState<Date>(startOfMonth(new Date()));
-  const [slideDir, setSlideDir] = useState<'prev' | 'next'>('next');
+  const [slideDir, setSlideDir] = useState<'prev' | 'next' | undefined>(undefined);
   const [seminars, setSeminars] = useState<Seminar[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);

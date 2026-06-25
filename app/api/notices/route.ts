@@ -20,6 +20,9 @@ export async function POST(request: Request) {
     if (!body.body?.trim()) {
       return Response.json({ error: 'body is required' }, { status: 400 });
     }
+    if (body.body.length > 1000) {
+      return Response.json({ error: 'body must be 1000 characters or fewer' }, { status: 400 });
+    }
     const now = new Date().toISOString();
     const data = {
       body: body.body.trim(),
