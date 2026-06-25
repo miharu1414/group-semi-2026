@@ -68,18 +68,18 @@ body {
 
 /* Calendar month slide animations (triggered on month change via key remount) */
 @keyframes calSlideNext {
-  from { transform: translateX(28px); opacity: 0; }
+  from { transform: translateX(72px); opacity: 0; }
   to   { transform: translateX(0);    opacity: 1; }
 }
 @keyframes calSlidePrev {
-  from { transform: translateX(-28px); opacity: 0; }
+  from { transform: translateX(-72px); opacity: 0; }
   to   { transform: translateX(0);     opacity: 1; }
 }
 .cal-slide-next {
-  animation: calSlideNext 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: calSlideNext 0.26s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .cal-slide-prev {
-  animation: calSlidePrev 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: calSlidePrev 0.26s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* ── Mobile / Touch optimizations ─────────────────────────── */
