@@ -55,3 +55,33 @@ body {
 .modal-backdrop {
   backdrop-filter: blur(4px);
 }
+
+/* ── Mobile / Touch optimizations ─────────────────────────── */
+
+/* Remove grey flash on tap (iOS Safari / Android Chrome) */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent double-tap zoom on interactive elements */
+button, a, [role="button"], input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* Bottom sheet slide-up animation (mobile modals) */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 639px) {
+  .animate-fade-in-up {
+    animation: slideUp 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+}

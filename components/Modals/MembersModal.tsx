@@ -65,13 +65,20 @@ export default function MembersModal({ open, members, onClose, onChange }: Props
   return (
     <>
       <div className="fixed inset-0 bg-black/40 modal-backdrop z-40" onClick={onClose} />
-      <div className="fixed right-0 top-0 h-full w-full sm:w-[380px] bg-white shadow-2xl z-50 flex flex-col animate-fade-in-up">
+      <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-end sm:justify-start pointer-events-none">
+      <div className="pointer-events-auto w-full sm:w-[380px] sm:h-full bg-white shadow-2xl flex flex-col animate-fade-in-up rounded-t-3xl sm:rounded-none max-h-[92dvh] sm:max-h-none">
+        {/* Drag handle (mobile only) */}
+        <div className="flex justify-center pt-3 pb-1 sm:hidden shrink-0">
+          <div className="w-10 h-1 rounded-full bg-gray-300" />
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 shrink-0">
           <h2 className="text-base font-semibold text-gray-900">メンバー管理</h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
+            className="p-2.5 sm:p-2 rounded-xl hover:bg-gray-100 active:bg-gray-200 text-gray-500 hover:text-gray-700 transition-colors touch-manipulation"
+            aria-label="閉じる"
           >
             <X size={18} />
           </button>
@@ -130,17 +137,19 @@ export default function MembersModal({ open, members, onClose, onChange }: Props
                       </div>
                       <button
                         onClick={() => handleEditStart(member)}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                        className="p-2 sm:p-1.5 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 active:bg-indigo-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all shrink-0 touch-manipulation"
                         title="編集"
+                        aria-label="編集"
                       >
-                        <Pencil size={13} />
+                        <Pencil size={15} />
                       </button>
                       <button
                         onClick={() => handleDelete(member.id)}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                        className="p-2 sm:p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 active:bg-red-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all shrink-0 touch-manipulation"
                         title="削除"
+                        aria-label="削除"
                       >
-                        <Trash2 size={13} />
+                        <Trash2 size={15} />
                       </button>
                     </>
                   )}
@@ -177,13 +186,14 @@ export default function MembersModal({ open, members, onClose, onChange }: Props
             <button
               onClick={handleAdd}
               disabled={adding || !newName.trim()}
-              className="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white text-sm font-semibold px-3 py-2 rounded-lg transition-colors shrink-0"
+              className="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:bg-indigo-300 text-white text-sm font-semibold px-3 py-2.5 rounded-lg transition-colors shrink-0 touch-manipulation"
             >
               <Plus size={15} />
               追加
             </button>
           </div>
         </div>
+      </div>
       </div>
     </>
   );

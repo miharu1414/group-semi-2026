@@ -360,12 +360,12 @@ export default function SeminarModal({
           </div>
         </form>
 
-        {/* Footer */}
-        <div className="border-t border-gray-200 px-5 py-4 flex items-center justify-between shrink-0">
+        {/* Footer — extra bottom padding on iPhone for home bar */}
+        <div className="border-t border-gray-200 px-5 pt-4 pb-6 sm:py-4 flex items-center justify-between shrink-0">
           {seminar ? (
             <button type="button" onClick={handleDelete} disabled={deleting}
-              className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg transition-all ${
-                confirmDelete ? 'bg-red-600 text-white hover:bg-red-700' : 'text-red-500 hover:bg-red-50'
+              className={`flex items-center gap-2 text-sm px-3 py-2.5 sm:py-2 rounded-lg transition-all touch-manipulation ${
+                confirmDelete ? 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800' : 'text-red-500 hover:bg-red-50 active:bg-red-100'
               }`}
             >
               <Trash2 size={15} />
@@ -373,11 +373,11 @@ export default function SeminarModal({
             </button>
           ) : (
             <button type="button" onClick={onClose}
-              className="text-sm text-gray-500 hover:text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="text-sm text-gray-500 hover:text-gray-700 px-3 py-2.5 sm:py-2 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
             >キャンセル</button>
           )}
           <button type="button" disabled={saving || !form.date} onClick={handleSubmit}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:bg-indigo-300 text-white text-sm font-semibold px-5 py-3 sm:py-2.5 rounded-xl transition-colors shadow-sm touch-manipulation"
           >
             <Save size={15} />
             {saving ? '保存中...' : '保存する'}

@@ -35,20 +35,27 @@ export default function DayDetailModal({
         onClick={onClose}
       />
 
-      {/* Modal — centered */}
+      {/* Modal:
+          Mobile  — bottom sheet (slides up from bottom, thumb-friendly)
+          Desktop — centered dialog */}
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center sm:p-4"
         onClick={onClose}
       >
         <div
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-fade-in-up overflow-hidden"
+          className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md max-h-[88dvh] sm:max-h-[75vh] flex flex-col animate-fade-in-up"
           onClick={(e) => e.stopPropagation()}
           role="dialog"
           aria-modal="true"
           aria-label={displayDate}
         >
+          {/* Drag handle (mobile) */}
+          <div className="flex justify-center pt-3 pb-1 sm:hidden shrink-0">
+            <div className="w-10 h-1 rounded-full bg-gray-300" />
+          </div>
+
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
                 <CalendarDays size={18} className="text-indigo-600" />
@@ -64,17 +71,17 @@ export default function DayDetailModal({
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-2.5 sm:p-2 rounded-xl hover:bg-gray-100 active:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors touch-manipulation"
               aria-label="閉じる"
             >
-              <X size={18} />
+              <X size={20} />
             </button>
           </div>
 
           {/* Seminar list */}
-          <div className="px-4 py-3 space-y-2 max-h-[55vh] overflow-y-auto">
+          <div className="px-4 py-3 space-y-2 flex-1 overflow-y-auto">
             {seminars.length === 0 ? (
-              <div className="text-center py-8">
+              <div className="text-center py-10">
                 <p className="text-sm text-gray-400">この日の予定はありません</p>
                 <p className="text-xs text-gray-300 mt-1">下のボタンから追加できます</p>
               </div>
@@ -96,15 +103,15 @@ export default function DayDetailModal({
                     key={seminar.id}
                     onClick={() => onEdit(seminar)}
                     className={`
-                      w-full text-left rounded-xl border p-3.5 transition-all
-                      hover:shadow-md active:scale-[0.98]
+                      w-full text-left rounded-xl border p-4 transition-all touch-manipulation
+                      hover:shadow-md active:scale-[0.98] active:brightness-95
                       ${cfg.bgClass} ${cfg.borderClass} ${cfg.hoverClass}
                     `}
                   >
                     {/* Type + title row */}
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className={`w-2 h-2 rounded-full ${cfg.dotClass} shrink-0`} />
+                        <span className={`w-2.5 h-2.5 rounded-full ${cfg.dotClass} shrink-0`} />
                         <span className={`text-sm font-bold ${cfg.textClass}`}>{displayLabel}</span>
                         {seminar.title && (
                           <span className={`text-sm truncate ${cfg.textClass} opacity-75`}>
@@ -118,18 +125,18 @@ export default function DayDetailModal({
                             {seminar.start_time}{seminar.end_time ? `〜${seminar.end_time}` : '〜'}
                           </span>
                         )}
-                        <ChevronRight size={14} className={`${cfg.textClass} opacity-40`} />
+                        <ChevronRight size={16} className={`${cfg.textClass} opacity-40`} />
                       </div>
                     </div>
 
                     {/* Assignees */}
                     {assignees.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1.5 pl-4">
+                      <div className="mt-2.5 flex flex-wrap gap-1.5 pl-4">
                         {assignees.map(({ role, name }) => (
                           <span
                             key={`${role}-${name}`}
                             className={`
-                              text-xs px-2 py-0.5 rounded-full font-medium
+                              text-xs px-2.5 py-1 rounded-full font-medium
                               bg-white/70 ${cfg.textClass}
                             `}
                           >
@@ -153,12 +160,12 @@ export default function DayDetailModal({
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-4 border-t border-gray-100">
+          <div className="px-4 pt-3 pb-5 sm:py-4 border-t border-gray-100 shrink-0">
             <button
               onClick={onAdd}
-              className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors shadow-sm"
+              className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-sm font-semibold px-4 py-3.5 sm:py-2.5 rounded-xl transition-colors shadow-sm touch-manipulation"
             >
-              <Plus size={16} />
+              <Plus size={18} />
               予定を追加
             </button>
           </div>
