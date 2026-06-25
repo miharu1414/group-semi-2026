@@ -190,10 +190,8 @@ export default function CalendarApp() {
       <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between shrink-0 shadow-sm z-30">
         {/* Left: Logo + Title */}
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-200 shadow-sm bg-white">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Logo" className="w-10 h-10 sm:w-11 sm:h-11 object-contain shrink-0" />
           <div className="min-w-0">
             <h1 className="text-sm sm:text-base font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-700 leading-tight truncate">
               班ゼミカレンダー
