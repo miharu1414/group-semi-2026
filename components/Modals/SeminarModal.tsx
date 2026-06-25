@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { X, Trash2, Save } from 'lucide-react';
-import { Seminar, SeminarFormData, SeminarType, SEMINAR_TYPES, Member } from '@/lib/types';
+import { Seminar, SeminarFormData, SeminarType, SEMINAR_TYPES, Member, normalizeAssigneeB } from '@/lib/types';
 
 interface Props {
   open: boolean;
@@ -22,7 +22,7 @@ const EMPTY_FORM: SeminarFormData = {
   type: 'rinudoku',
   title: '',
   assignee_a: '',
-  assignee_b: '',
+  assignee_b: [],
   assignee_c: '',
   notes: '',
 };
@@ -51,7 +51,7 @@ export default function SeminarModal({
           type: seminar.type,
           title: seminar.title,
           assignee_a: seminar.assignee_a,
-          assignee_b: seminar.assignee_b,
+          assignee_b: normalizeAssigneeB(seminar.assignee_b),
           assignee_c: seminar.assignee_c,
           notes: seminar.notes,
         });
@@ -88,6 +88,41 @@ export default function SeminarModal({
 
   const set = <K extends keyof SeminarFormData>(key: K, value: SeminarFormData[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
+  };
+
+  // A or C 変更時に残りメンバーを B へ自動セット
+  const handleAssigneeAChange = (val: string) => {
+    setForm((f) => {
+      const next = { ...f, assignee_a: val };
+      // B が未選択のときのみ auto-fill（手動選択を上書きしない）
+      if (val && next.assignee_c && next.assignee_b.length === 0) {
+        next.assignee_b = members
+          .map((m) => m.name)
+          .filter((n) => n !== val && n !== next.assignee_c);
+      }
+      return next;
+    });
+  };
+
+  const handleAssigneeCChange = (val: string) => {
+    setForm((f) => {
+      const next = { ...f, assignee_c: val };
+      if (f.assignee_a && val && f.assignee_b.length === 0) {
+        next.assignee_b = members
+          .map((m) => m.name)
+          .filter((n) => n !== f.assignee_a && n !== val);
+      }
+      return next;
+    });
+  };
+
+  const toggleAssigneeB = (name: string) => {
+    setForm((f) => ({
+      ...f,
+      assignee_b: f.assignee_b.includes(name)
+        ? f.assignee_b.filter((n) => n !== name)
+        : [...f.assignee_b, name],
+    }));
   };
 
   const memberOptions = members.map((m) => m.name);
@@ -198,44 +233,111 @@ export default function SeminarModal({
                 担当者
               </label>
               <div className="space-y-2.5">
-                {(['a', 'b', 'c'] as const).map((role) => {
-                  const key = `assignee_${role}` as keyof SeminarFormData;
-                  return (
-                    <div key={role} className="flex items-center gap-2.5">
-                      <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-600 text-xs font-bold flex items-center justify-center shrink-0 uppercase">
-                        {role}
-                      </span>
-                      {memberOptions.length > 0 ? (
-                        <select
-                          value={form[key] as string}
-                          onChange={(e) => set(key, e.target.value)}
-                          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow bg-white"
-                        >
-                          <option value="">未設定</option>
-                          {memberOptions.map((name) => (
-                            <option key={name} value={name}>
+                {/* A */}
+                <div className="flex items-center gap-2.5">
+                  <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-600 text-xs font-bold flex items-center justify-center shrink-0 uppercase">
+                    a
+                  </span>
+                  {memberOptions.length > 0 ? (
+                    <select
+                      value={form.assignee_a}
+                      onChange={(e) => handleAssigneeAChange(e.target.value)}
+                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow bg-white"
+                    >
+                      <option value="">未設定</option>
+                      {memberOptions.map((name) => (
+                        <option key={name} value={name}>{name}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={form.assignee_a}
+                      onChange={(e) => handleAssigneeAChange(e.target.value)}
+                      placeholder="担当者 A"
+                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-300 transition-shadow"
+                    />
+                  )}
+                </div>
+
+                {/* B — 複数選択 */}
+                <div className="flex items-start gap-2.5">
+                  <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-600 text-xs font-bold flex items-center justify-center shrink-0 uppercase mt-1">
+                    b
+                  </span>
+                  {memberOptions.length > 0 ? (
+                    <div className="flex-1">
+                      <div className="flex flex-wrap gap-1.5">
+                        {memberOptions.map((name) => {
+                          const selected = form.assignee_b.includes(name);
+                          return (
+                            <button
+                              key={name}
+                              type="button"
+                              onClick={() => toggleAssigneeB(name)}
+                              className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${
+                                selected
+                                  ? 'bg-indigo-100 text-indigo-800 border-indigo-300 shadow-sm'
+                                  : 'bg-white text-gray-500 border-gray-300 hover:border-gray-400'
+                              }`}
+                            >
                               {name}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <input
-                          type="text"
-                          value={form[key] as string}
-                          onChange={(e) => set(key, e.target.value)}
-                          placeholder={`担当者 ${role.toUpperCase()}`}
-                          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-300 transition-shadow"
-                        />
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {form.assignee_b.length > 0 && (
+                        <p className="text-xs text-gray-400 mt-1">
+                          選択中: {form.assignee_b.join('・')}
+                        </p>
                       )}
                     </div>
-                  );
-                })}
+                  ) : (
+                    <input
+                      type="text"
+                      value={form.assignee_b.join('、')}
+                      onChange={(e) =>
+                        set('assignee_b', e.target.value ? e.target.value.split('、') : [])
+                      }
+                      placeholder="担当者 B（複数可）"
+                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-300 transition-shadow"
+                    />
+                  )}
+                </div>
+
+                {/* C */}
+                <div className="flex items-center gap-2.5">
+                  <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-600 text-xs font-bold flex items-center justify-center shrink-0 uppercase">
+                    c
+                  </span>
+                  {memberOptions.length > 0 ? (
+                    <select
+                      value={form.assignee_c}
+                      onChange={(e) => handleAssigneeCChange(e.target.value)}
+                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow bg-white"
+                    >
+                      <option value="">未設定</option>
+                      {memberOptions.map((name) => (
+                        <option key={name} value={name}>{name}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={form.assignee_c}
+                      onChange={(e) => handleAssigneeCChange(e.target.value)}
+                      placeholder="担当者 C"
+                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-300 transition-shadow"
+                    />
+                  )}
+                </div>
               </div>
-              {memberOptions.length === 0 && (
-                <p className="text-xs text-gray-400 mt-1.5">
-                  ヘッダーの「メンバー管理」からメンバーを追加するとドロップダウンで選択できます
-                </p>
-              )}
+
+              <p className="text-xs text-gray-400 mt-1.5">
+                {memberOptions.length === 0
+                  ? 'ヘッダーの「メンバー管理」からメンバーを追加するとドロップダウンで選択できます'
+                  : 'A・C を選ぶと B に残りのメンバーが自動入力されます'}
+              </p>
             </div>
 
             {/* Notes */}

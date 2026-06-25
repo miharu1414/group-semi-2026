@@ -1,6 +1,6 @@
 'use client';
 
-import { Seminar, SEMINAR_TYPES } from '@/lib/types';
+import { Seminar, SEMINAR_TYPES, normalizeAssigneeB } from '@/lib/types';
 
 interface Props {
   seminar: Seminar;
@@ -9,7 +9,8 @@ interface Props {
 
 export default function SeminarCard({ seminar, onClick }: Props) {
   const cfg = SEMINAR_TYPES[seminar.type];
-  const assignees = [seminar.assignee_a, seminar.assignee_b, seminar.assignee_c].filter(Boolean);
+  const bNames = normalizeAssigneeB(seminar.assignee_b);
+  const hasAssignees = seminar.assignee_a || bNames.length > 0 || seminar.assignee_c;
 
   return (
     <button
@@ -31,19 +32,27 @@ export default function SeminarCard({ seminar, onClick }: Props) {
         )}
       </div>
 
-      {/* Assignees — always show all roles, truncate gracefully */}
-      {assignees.length > 0 && (
+      {/* Assignees */}
+      {hasAssignees && (
         <div className="mt-0.5 flex flex-col gap-y-0.5 pl-2.5">
-          {(['a', 'b', 'c'] as const).map((role) => {
-            const name = seminar[`assignee_${role}`];
-            if (!name) return null;
-            return (
-              <span key={role} className="text-xs opacity-80 truncate leading-tight">
-                <span className="font-bold opacity-50 mr-0.5 uppercase">{role}</span>
-                {name}
-              </span>
-            );
-          })}
+          {seminar.assignee_a && (
+            <span className="text-xs opacity-80 truncate leading-tight">
+              <span className="font-bold opacity-50 mr-0.5 uppercase">a</span>
+              {seminar.assignee_a}
+            </span>
+          )}
+          {bNames.length > 0 && (
+            <span className="text-xs opacity-80 truncate leading-tight">
+              <span className="font-bold opacity-50 mr-0.5 uppercase">b</span>
+              {bNames.join('・')}
+            </span>
+          )}
+          {seminar.assignee_c && (
+            <span className="text-xs opacity-80 truncate leading-tight">
+              <span className="font-bold opacity-50 mr-0.5 uppercase">c</span>
+              {seminar.assignee_c}
+            </span>
+          )}
         </div>
       )}
     </button>

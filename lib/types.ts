@@ -46,7 +46,7 @@ export interface Seminar {
   type: SeminarType;
   title: string;
   assignee_a: string;
-  assignee_b: string;
+  assignee_b: string[];
   assignee_c: string;
   notes: string;
   created_at: string;
@@ -66,7 +66,7 @@ export interface SeminarFormData {
   type: SeminarType;
   title: string;
   assignee_a: string;
-  assignee_b: string;
+  assignee_b: string[];
   assignee_c: string;
   notes: string;
 }
@@ -75,4 +75,10 @@ export interface MemberFormData {
   name: string;
   role: string;
   order_num: number;
+}
+
+export function normalizeAssigneeB(val: unknown): string[] {
+  if (Array.isArray(val)) return val as string[];
+  if (typeof val === 'string' && val) return [val];
+  return [];
 }

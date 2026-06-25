@@ -27,7 +27,7 @@ interface Props {
   onSeminarClick: (seminar: Seminar) => void;
 }
 
-const WEEKDAYS = ['月', '火', '水', '木', '金', '土', '日'];
+const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
 
 export default function CalendarView({
   currentMonth,
@@ -42,8 +42,8 @@ export default function CalendarView({
 }: Props) {
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
-  const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
-  const calEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+  const calStart = startOfWeek(monthStart, { weekStartsOn: 0 });
+  const calEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
   const days = eachDayOfInterval({ start: calStart, end: calEnd });
 
   const seminarsByDate: Record<string, Seminar[]> = {};
@@ -92,9 +92,9 @@ export default function CalendarView({
           <div
             key={day}
             className={`py-2 text-center text-xs font-semibold tracking-wide
-              ${i === 5 ? 'text-blue-500' : ''}
-              ${i === 6 ? 'text-red-500' : ''}
-              ${i < 5 ? 'text-gray-500' : ''}
+              ${i === 0 ? 'text-red-500' : ''}
+              ${i === 6 ? 'text-blue-500' : ''}
+              ${i > 0 && i < 6 ? 'text-gray-500' : ''}
             `}
           >
             {day}
@@ -104,7 +104,7 @@ export default function CalendarView({
 
       {/* Calendar Grid */}
       <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-7 h-full" style={{ gridAutoRows: 'minmax(100px, 1fr)' }}>
+        <div className="grid grid-cols-7 h-full" style={{ gridAutoRows: 'minmax(clamp(72px, 14vw, 120px), 1fr)' }}>
           {days.map((day, idx) => {
             const dateStr = format(day, 'yyyy-MM-dd');
             const isCurrentMonth = isSameMonth(day, currentMonth);
@@ -117,7 +117,7 @@ export default function CalendarView({
                 key={dateStr}
                 className={`
                   relative border-r border-b border-gray-200 group
-                  transition-colors cursor-pointer
+                  overflow-hidden transition-colors cursor-pointer
                   ${!isCurrentMonth
                     ? 'bg-gray-50'
                     : isCurrentDay
@@ -158,12 +158,13 @@ export default function CalendarView({
                   {/* Quick-add button on hover */}
                   {isCurrentMonth && (
                     <button
-                      className="opacity-0 group-hover:opacity-100 transition-opacity w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-600 flex items-center justify-center text-sm leading-none shrink-0 mt-0.5"
+                      className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity w-6 h-6 sm:w-6 sm:h-6 rounded-full bg-indigo-100 hover:bg-indigo-200 active:bg-indigo-300 text-indigo-600 flex items-center justify-center text-sm leading-none shrink-0 mt-0.5 touch-manipulation"
                       onClick={(e) => {
                         e.stopPropagation();
                         onQuickAdd(dateStr);
                       }}
                       title="予定を追加"
+                      aria-label="予定を追加"
                     >
                       +
                     </button>

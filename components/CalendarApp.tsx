@@ -2,13 +2,15 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { format, startOfMonth } from 'date-fns';
-import { Users } from 'lucide-react';
+import { Users, BookOpen, User } from 'lucide-react';
 import { Seminar, Member } from '@/lib/types';
 import { getSeminars, createSeminar, updateSeminar, deleteSeminar, getMembers } from '@/lib/api';
 import CalendarView from './Calendar/CalendarView';
 import SeminarModal from './Modals/SeminarModal';
 import MembersModal from './Modals/MembersModal';
 import DayDetailModal from './Modals/DayDetailModal';
+import InfoModal from './Modals/InfoModal';
+import MemberScheduleModal from './Modals/MemberScheduleModal';
 import { SeminarFormData } from '@/lib/types';
 
 export default function CalendarApp() {
@@ -18,13 +20,15 @@ export default function CalendarApp() {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
 
-  // DayDetail modal state
+  // DayDetail modal
   const [dayDetailOpen, setDayDetailOpen] = useState(false);
   const [dayDetailDate, setDayDetailDate] = useState('');
 
-  // Seminar modal state
+  // Seminar modal
   const [seminarModalOpen, setSeminarModalOpen] = useState(false);
   const [membersModalOpen, setMembersModalOpen] = useState(false);
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [memberScheduleOpen, setMemberScheduleOpen] = useState(false);
   const [editingSeminar, setEditingSeminar] = useState<Seminar | null>(null);
   const [defaultDate, setDefaultDate] = useState<string>('');
   const [savingError, setSavingError] = useState<string | null>(null);
@@ -72,13 +76,11 @@ export default function CalendarApp() {
   };
 
   // ── Day Detail Modal ─────────────────────────────────
-  /** カレンダーの日付セルをクリック → DayDetailModal を開く */
   const handleDayClick = (dateStr: string) => {
     setDayDetailDate(dateStr);
     setDayDetailOpen(true);
   };
 
-  /** DayDetailModal の「予定を追加」ボタン → SeminarModal（新規）を開く */
   const handleDayDetailAdd = () => {
     setDayDetailOpen(false);
     setEditingSeminar(null);
@@ -87,7 +89,6 @@ export default function CalendarApp() {
     setSeminarModalOpen(true);
   };
 
-  /** DayDetailModal の予定カードをクリック → SeminarModal（編集）を開く */
   const handleDayDetailEdit = (seminar: Seminar) => {
     setDayDetailOpen(false);
     setEditingSeminar(seminar);
@@ -96,8 +97,7 @@ export default function CalendarApp() {
     setSeminarModalOpen(true);
   };
 
-  // ── Quick add (+ button on calendar cell) ────────────
-  /** カレンダーの + ボタン → SeminarModal（新規）を直接開く */
+  // ── Quick add ────────────────────────────────────────
   const handleQuickAdd = (dateStr: string) => {
     setEditingSeminar(null);
     setDefaultDate(dateStr);
@@ -105,7 +105,6 @@ export default function CalendarApp() {
     setSeminarModalOpen(true);
   };
 
-  // ── Seminar card click on calendar (direct edit) ─────
   const handleSeminarClick = (seminar: Seminar) => {
     setEditingSeminar(seminar);
     setDefaultDate(seminar.date);
@@ -150,51 +149,76 @@ export default function CalendarApp() {
     setMembers(updated);
   };
 
-  // Seminars for the selected day (used by DayDetailModal)
   const dayDetailSeminars = seminars.filter((s) => s.date === dayDetailDate);
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-dvh">
       {/* ── App Header ── */}
-      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center justify-between shrink-0 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+      <header className="bg-white border-b border-gray-200 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between shrink-0 shadow-sm">
+        {/* Left: Logo + Title */}
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0">
             <span className="text-white text-sm font-bold">ゼ</span>
           </div>
-          <div>
-            <h1 className="text-base font-bold text-gray-900 leading-tight">班ゼミカレンダー</h1>
+          <div className="min-w-0">
+            <h1 className="text-sm sm:text-base font-bold text-gray-900 leading-tight truncate">
+              班ゼミカレンダー
+            </h1>
             <p className="text-xs text-gray-500 leading-tight">2026</p>
           </div>
         </div>
 
-        {/* Legend */}
-        <div className="hidden sm:flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 shrink-0" />
-            <span className="text-xs text-gray-600">輪読ゼミ</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-violet-500 shrink-0" />
-            <span className="text-xs text-gray-600">全体ゼミ</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-teal-500 shrink-0" />
-            <span className="text-xs text-gray-600">研究共有</span>
-          </div>
+        {/* Center: Legend (hidden on mobile) */}
+        <div className="hidden md:flex items-center gap-4 mx-4">
+          {[
+            { color: 'bg-indigo-500', label: '輪読ゼミ' },
+            { color: 'bg-violet-500', label: '全体ゼミ' },
+            { color: 'bg-teal-500',   label: '研究共有' },
+          ].map(({ color, label }) => (
+            <div key={label} className="flex items-center gap-1.5">
+              <span className={`w-2.5 h-2.5 rounded-full ${color} shrink-0`} />
+              <span className="text-xs text-gray-600">{label}</span>
+            </div>
+          ))}
         </div>
 
-        <button
-          onClick={() => setMembersModalOpen(true)}
-          className="flex items-center gap-2 text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors"
-        >
-          <Users size={16} />
-          <span className="hidden sm:inline">メンバー管理</span>
-        </button>
+        {/* Right: Action buttons */}
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          <button
+            onClick={() => setInfoModalOpen(true)}
+            className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 p-2 sm:px-3 sm:py-1.5 rounded-lg transition-colors"
+            title="ゼミ概要・役割説明"
+            aria-label="ゼミ概要・役割説明"
+          >
+            <BookOpen size={17} />
+            <span className="hidden sm:inline text-sm">概要</span>
+          </button>
+
+          <button
+            onClick={() => setMemberScheduleOpen(true)}
+            className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-violet-600 hover:bg-violet-50 p-2 sm:px-3 sm:py-1.5 rounded-lg transition-colors"
+            title="担当一覧"
+            aria-label="担当一覧"
+          >
+            <User size={17} />
+            <span className="hidden sm:inline text-sm">担当確認</span>
+          </button>
+
+          <button
+            onClick={() => setMembersModalOpen(true)}
+            className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 p-2 sm:px-3 sm:py-1.5 rounded-lg transition-colors"
+            title="メンバー管理"
+            aria-label="メンバー管理"
+          >
+            <Users size={17} />
+            <span className="hidden sm:inline text-sm">メンバー</span>
+          </button>
+        </div>
       </header>
 
       {/* ── Fetch Error Banner ── */}
       {fetchError && (
-        <div className="bg-red-50 border-b border-red-200 px-4 py-2 flex items-center justify-between">
+        <div className="bg-red-50 border-b border-red-200 px-4 py-2 flex items-center justify-between shrink-0">
           <span className="text-sm text-red-700">データの読み込みに失敗しました。</span>
           <button
             onClick={fetchData}
@@ -206,7 +230,7 @@ export default function CalendarApp() {
       )}
 
       {/* ── Calendar ── */}
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-hidden min-h-0">
         <CalendarView
           currentMonth={currentMonth}
           seminars={seminars}
@@ -220,7 +244,7 @@ export default function CalendarApp() {
         />
       </main>
 
-      {/* ── Day Detail Modal ── */}
+      {/* ── Modals ── */}
       <DayDetailModal
         open={dayDetailOpen}
         dateStr={dayDetailDate}
@@ -230,7 +254,6 @@ export default function CalendarApp() {
         onEdit={handleDayDetailEdit}
       />
 
-      {/* ── Seminar Modal ── */}
       <SeminarModal
         open={seminarModalOpen}
         seminar={editingSeminar}
@@ -246,12 +269,22 @@ export default function CalendarApp() {
         onDelete={handleSeminarDelete}
       />
 
-      {/* ── Members Modal ── */}
       <MembersModal
         open={membersModalOpen}
         members={members}
         onClose={() => setMembersModalOpen(false)}
         onChange={handleMembersChange}
+      />
+
+      <InfoModal
+        open={infoModalOpen}
+        onClose={() => setInfoModalOpen(false)}
+      />
+
+      <MemberScheduleModal
+        open={memberScheduleOpen}
+        members={members}
+        onClose={() => setMemberScheduleOpen(false)}
       />
     </div>
   );

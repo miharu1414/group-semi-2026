@@ -3,7 +3,7 @@
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { X, Plus, ChevronRight, CalendarDays } from 'lucide-react';
-import { Seminar, SEMINAR_TYPES } from '@/lib/types';
+import { Seminar, SEMINAR_TYPES, normalizeAssigneeB } from '@/lib/types';
 
 interface Props {
   open: boolean;
@@ -80,13 +80,12 @@ export default function DayDetailModal({
             ) : (
               seminars.map((seminar) => {
                 const cfg = SEMINAR_TYPES[seminar.type];
-                const assignees = (
-                  [
-                    seminar.assignee_a ? { role: 'A', name: seminar.assignee_a } : null,
-                    seminar.assignee_b ? { role: 'B', name: seminar.assignee_b } : null,
-                    seminar.assignee_c ? { role: 'C', name: seminar.assignee_c } : null,
-                  ] as ({ role: string; name: string } | null)[]
-                ).filter((x): x is { role: string; name: string } => x !== null);
+                const bNames = normalizeAssigneeB(seminar.assignee_b);
+                const assignees: { role: string; name: string }[] = [
+                  ...(seminar.assignee_a ? [{ role: 'A', name: seminar.assignee_a }] : []),
+                  ...bNames.map((n) => ({ role: 'B', name: n })),
+                  ...(seminar.assignee_c ? [{ role: 'C', name: seminar.assignee_c }] : []),
+                ];
 
                 return (
                   <button
@@ -117,7 +116,7 @@ export default function DayDetailModal({
                       <div className="mt-2 flex flex-wrap gap-1.5 pl-4">
                         {assignees.map(({ role, name }) => (
                           <span
-                            key={role}
+                            key={`${role}-${name}`}
                             className={`
                               text-xs px-2 py-0.5 rounded-full font-medium
                               bg-white/70 ${cfg.textClass}

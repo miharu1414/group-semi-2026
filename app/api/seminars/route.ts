@@ -1,4 +1,5 @@
 import { db } from '@/lib/firebase-admin';
+import { normalizeAssigneeB } from '@/lib/types';
 
 export async function GET(request: Request) {
   try {
@@ -6,7 +7,11 @@ export async function GET(request: Request) {
     const month = searchParams.get('month'); // yyyy-MM
 
     const snapshot = await db.collection('seminars').orderBy('date', 'asc').get();
-    const seminars = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as { id: string; date: string; [key: string]: unknown }));
+    type SeminarDoc = { id: string; date: string; assignee_b: string[]; [key: string]: unknown };
+    const seminars = snapshot.docs.map((doc) => {
+      const data = doc.data() as Record<string, unknown>;
+      return { id: doc.id, ...data, assignee_b: normalizeAssigneeB(data.assignee_b) } as unknown as SeminarDoc;
+    });
 
     return Response.json(
       month ? seminars.filter((s) => s.date.startsWith(month)) : seminars
@@ -24,7 +29,7 @@ export async function POST(request: Request) {
       type: string;
       title?: string;
       assignee_a?: string;
-      assignee_b?: string;
+      assignee_b?: string[];
       assignee_c?: string;
       notes?: string;
     };
@@ -39,7 +44,7 @@ export async function POST(request: Request) {
       type: body.type,
       title: body.title ?? '',
       assignee_a: body.assignee_a ?? '',
-      assignee_b: body.assignee_b ?? '',
+      assignee_b: body.assignee_b ?? [],
       assignee_c: body.assignee_c ?? '',
       notes: body.notes ?? '',
       created_at: now,
