@@ -41,9 +41,34 @@ npm run lint
 npm run build
 ```
 
+## Dev Server Management
+
+The dev server must be explicitly started and kept healthy. CSS/style breakage is almost always a stale or dead server process.
+
+**Checking the server:**
+```bash
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3000
+# 200 = healthy, 000 = not running
+```
+
+**Starting (or restarting) the server:**
+```bash
+pkill -f "next dev" 2>/dev/null; sleep 1
+npm run dev > /tmp/nextdev.log 2>&1 &
+sleep 8 && curl -s -o /dev/null -w "%{http_code}" http://localhost:3000
+```
+
+**Rules:**
+- Always restart after `npm install` — new `node_modules` require a fresh server.
+- Always restart after a session gap — the background process may have died.
+- After restarting, tell the user to hard-refresh the browser: **Cmd+Shift+R** (Mac) / **Ctrl+Shift+R** (Windows).
+- If the page renders without CSS (plain text, no layout), that is a dead/stale server. Restart first before investigating code.
+- After a restart, confirm the server is healthy (HTTP 200) before reporting the task done.
+
 ## Before Finishing Work
 
 1. Run the narrowest relevant check.
 2. Run `npm run docs:check` when documentation or architecture assumptions changed.
 3. Run `npm run build` when API, shared types, or config changed.
 4. Confirm no secret values were added to tracked files.
+5. Confirm the dev server is running and returns HTTP 200.
