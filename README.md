@@ -1,64 +1,76 @@
-# 班ゼミカレンダー 2026
+# Group Seminar Calendar 2026
 
-輪読ゼミ・全体ゼミ・研究共有の予定・担当者を管理するWebアプリです。
+研究室の輪読ゼミ、全体ゼミ、研究共有会の予定と担当者を管理するWebアプリです。
 
-**Tech Stack:** Next.js 14 + TypeScript + Tailwind CSS + Cloudflare Pages + Cloudflare D1
+**Tech Stack:** Next.js 14 + TypeScript + Tailwind CSS + Firebase Admin SDK + Firestore
 
----
-
-## クイックスタート
+## Quick Start
 
 ```bash
-# 1. 依存関係インストール
 npm install
-
-# 2. 環境変数設定
-cp .env.example .env.local   # 値を入力する（または wrangler login でOK）
-
-# 3. Cloudflare ログイン
-npx wrangler login
-
-# 4. wrangler.toml に database_id を設定（初回のみ）
-#    → docs/SETUP.md 手順4 を参照
-
-# 5. DBマイグレーション（ローカル）
-npm run db:migrate
-
-# 6. ローカルプレビュー起動（API込み）
-npm run preview   # → http://localhost:8788
+cp .env.example .env.local
+npm run dev
 ```
 
----
+開発サーバーは `http://localhost:3000` で起動します。
 
-## ドキュメント
+## Documentation Governance
 
-| ドキュメント | 内容 |
-|------------|------|
-| [docs/SETUP.md](docs/SETUP.md) | 詳細セットアップ手順（他PCでの開発開始方法）|
-| [docs/cloudflare-setup.md](docs/cloudflare-setup.md) | Cloudflare手動セットアップ手順書 |
-| [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | 要件定義 |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | システム構成・API設計 |
-| [docs/PROGRESS.md](docs/PROGRESS.md) | 進捗管理・タスク一覧 |
-| [CLAUDE.md](CLAUDE.md) | AI開発ガイド（Claude Code用）|
+アーキテクチャ、DB、環境変数、セットアップ手順、AI向け指示を変更する前に、次を確認してください。
 
----
+1. `docs/GOVERNANCE.md`
+2. `docs/PROJECT_CONTEXT.json`
+3. `docs/ARCHITECTURE.md`
+4. `docs/instructions/INDEX.md`
 
-## 主要コマンド
+関連する変更を終える前に、ドキュメント整合性チェックを実行します。
 
-| コマンド | 説明 |
-|---------|------|
-| `npm run dev` | 開発サーバー起動（UIのみ、APIなし）|
-| `npm run preview` | フルローカルプレビュー（API + D1込み）|
-| `npm run deploy` | Cloudflare Pagesへデプロイ |
-| `npm run db:migrate` | ローカルDBマイグレーション |
-| `npm run db:migrate:remote` | 本番DBマイグレーション |
+```bash
+npm run docs:check
+```
 
----
+## Environment Variables
 
-## 機能
+`.env.local` にFirebase Admin SDKのサービスアカウント情報を設定します。
 
-- 月次カレンダー表示（種別色分け：輪読/全体/研究共有）
-- 担当者A・B・Cの表示・管理
-- ゼミ予定のCRUD操作
-- メンバー管理
-- レスポンシブ対応（PC・スマホ）
+```env
+FIREBASE_PROJECT_ID=
+FIREBASE_CLIENT_EMAIL=
+FIREBASE_PRIVATE_KEY=
+```
+
+`FIREBASE_PRIVATE_KEY` は改行を `\n` に変換し、ダブルクォートで囲んでください。
+
+`.env.local` はgitignore対象です。秘密鍵やダウンロードしたサービスアカウントJSONはコミットしないでください。
+
+## Commands
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Next.js開発サーバーを起動 |
+| `npm run build` | 本番ビルド |
+| `npm run start` | ビルド済みアプリを起動 |
+| `npm run lint` | ESLintチェック |
+| `npm run docs:check` | ドキュメント整合性チェック |
+| `npm run check` | ドキュメント、lint、buildをまとめて確認 |
+
+## Main Files
+
+| Path | Purpose |
+| --- | --- |
+| `app/api/seminars` | ゼミ予定API |
+| `app/api/members` | メンバーAPI |
+| `lib/firebase-admin.ts` | Firebase Admin SDK初期化 |
+| `lib/types.ts` | 共有型定義 |
+| `components/CalendarApp.tsx` | カレンダーUIの状態管理 |
+
+## Documentation
+
+| Document | Description |
+| --- | --- |
+| `docs/GOVERNANCE.md` | ドキュメント整合性ルール |
+| `docs/PROJECT_CONTEXT.json` | 機械可読なプロジェクト文脈 |
+| `docs/SETUP.md` | 開発環境セットアップ |
+| `docs/ARCHITECTURE.md` | システム構成 |
+| `docs/REQUIREMENTS.md` | 要件定義 |
+| `docs/PROGRESS.md` | 進捗管理 |

@@ -30,7 +30,7 @@ export const SEMINAR_TYPES: Record<SeminarType, SeminarTypeConfig> = {
     hoverClass: 'hover:bg-violet-200',
   },
   kenkyu: {
-    label: '研究共有',
+    label: '研究共有会',
     shortLabel: '研究',
     bgClass: 'bg-teal-100',
     textClass: 'text-teal-800',
@@ -42,7 +42,7 @@ export const SEMINAR_TYPES: Record<SeminarType, SeminarTypeConfig> = {
 
 export interface Seminar {
   id: string;
-  date: string; // YYYY-MM-DD
+  date: string;
   type: SeminarType;
   title: string;
   assignee_a: string;

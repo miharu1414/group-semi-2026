@@ -1,32 +1,38 @@
 ---
-description: 班ゼミカレンダー 2026 — Cursor向け開発ルール
-globs: ["**/*.ts", "**/*.tsx", "**/*.sql"]
+description: Group Seminar Calendar 2026 development rules
+globs: ["**/*.ts", "**/*.tsx", "**/*.md", "docs/PROJECT_CONTEXT.json"]
 alwaysApply: true
 ---
 
-# Cursor Rules — 班ゼミカレンダー 2026
+# Cursor Rules
 
-## 必読ドキュメント
+## First Read
 
-作業前に以下を読んでください（優先順）:
+Read these before implementing changes:
 
-1. `docs/instructions/INDEX.md` — 全体マップ
-2. `docs/instructions/DATA_MODEL.md` — ゼミ種別・型定義（SSOT）
-3. `docs/instructions/SYSTEM_DESIGN.md` — Edge制約・アーキ原則
-4. `docs/instructions/CODING_STANDARDS.md` — コーディング規約
-5. `docs/instructions/DESIGN_RULES.md` — UIデザインルール
-6. `docs/instructions/AI_WORKFLOW.md` — 整合性チェックリスト
+1. `docs/GOVERNANCE.md`
+2. `docs/PROJECT_CONTEXT.json`
+3. `docs/ARCHITECTURE.md`
+4. `docs/instructions/INDEX.md`
 
-## 即座に守るべきルール
+## Project
 
-- すべての `app/api/**/*.ts` に `export const runtime = 'edge'` を付ける
-- D1へのアクセスは `getRequestContext().env.DB` 経由のみ
-- `any` 型を使わない
-- ゼミ種別の色は `lib/types.ts` の `SEMINAR_TYPES` から参照（ハードコード禁止）
-- 作業完了後は `docs/instructions/AI_WORKFLOW.md` のチェックリストを実行する
+Next.js 14 + TypeScript + Tailwind CSS application backed by Firebase Admin SDK and Firestore.
 
-## プロジェクト概要
+## Rules
 
-Next.js 14 + Cloudflare Pages + D1 で構築された研究室ゼミ予定管理カレンダー。  
-ゼミ種別: `rinudoku`（輪読）/ `zentai`（全体）/ `kenkyu`（研究共有）  
-担当者ロール: A（発表・進行）/ B（記録）/ C（資料・補佐）
+- Use Firebase Admin SDK only in server-side API routes.
+- Use `lib/firebase-admin.ts` for Firestore access.
+- Do not import `firebase-admin` from client components.
+- Store Firebase credentials in `.env.local` or deployment platform secrets.
+- Never commit `.env.local`, service account JSON, private keys, or generated credential files.
+- Do not restore deprecated database or setup assumptions.
+- Do not commit or push without explicit user instruction.
+- When implementing a feature or changing project operations, add a memo under `docs/memo` named `YYYY-MM-DD-kebab-case-summary.md`.
+- If architecture, DB, env vars, or setup steps change, update `docs/PROJECT_CONTEXT.json` and affected docs in the same change.
+
+## Checks
+
+- `npm run docs:check`
+- `npm run lint`
+- `npm run build`

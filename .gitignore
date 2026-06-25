@@ -17,19 +17,25 @@
 # misc
 .DS_Store
 *.pem
+*.key
+*.p12
+*.p8
+*-firebase-adminsdk-*.json
+service-account*.json
+firebase-service-account*.json
 
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files（値が入ったファイルはコミット禁止）
+# local env files
 .env
 .env.local
 .env*.local
-# .env.example と .env.local.example はコミットOK（テンプレートのため）
+# .env.example is committed as a template.
 
-# wrangler
+# wrangler / old Cloudflare local state
 .wrangler/
 
 # typescript

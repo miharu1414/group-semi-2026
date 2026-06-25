@@ -1,0 +1,61 @@
+{
+  "projectName": "Group Seminar Calendar 2026",
+  "lastReviewed": "2026-06-24",
+  "canonicalDocs": [
+    "docs/GOVERNANCE.md",
+    "docs/PROJECT_CONTEXT.json",
+    "docs/ARCHITECTURE.md",
+    "docs/REQUIREMENTS.md",
+    "docs/instructions/INDEX.md"
+  ],
+  "stack": {
+    "framework": "Next.js 14",
+    "language": "TypeScript",
+    "styling": "Tailwind CSS",
+    "serverSdk": "Firebase Admin SDK",
+    "database": "Firestore"
+  },
+  "runtime": {
+    "apiRoutes": "Next.js route handlers",
+    "requiresNodeRuntime": true
+  },
+  "environmentVariables": [
+    "FIREBASE_PROJECT_ID",
+    "FIREBASE_CLIENT_EMAIL",
+    "FIREBASE_PRIVATE_KEY"
+  ],
+  "sourceOfTruth": {
+    "dataTypes": "lib/types.ts",
+    "firebaseAdmin": "lib/firebase-admin.ts",
+    "apiRoutes": "app/api",
+    "uiComponents": "components"
+  },
+  "firestoreCollections": [
+    "seminars",
+    "members"
+  ],
+  "operationalRules": {
+    "commitPushPermission": "Do not commit or push without explicit user instruction.",
+    "featureMemoDirectory": "docs/memo",
+    "featureMemoFilenamePattern": "YYYY-MM-DD-kebab-case-summary.md",
+    "requiredDocTerms": [
+      "Do not commit or push without explicit user instruction.",
+      "docs/memo"
+    ]
+  },
+  "deprecatedClaims": [
+    "Cloudflare D1",
+    "wrangler.toml",
+    "getRequestContext().env.DB",
+    "npm run db:migrate",
+    "npm run preview",
+    "migrations/0001_schema.sql"
+  ],
+  "requiredAgentDocs": [
+    "CLAUDE.md",
+    "GEMINI.md",
+    "INSTRUCTIONS.md",
+    ".github/copilot-instructions.md",
+    ".cursor/rules/main.mdc"
+  ]
+}

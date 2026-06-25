@@ -1,28 +1,32 @@
-# GitHub Copilot Instructions — 班ゼミカレンダー 2026
+# GitHub Copilot Instructions
 
-このファイルはGitHub Copilotが自動で読み込む設定ファイルです。
+## First Read
 
-## 必読ドキュメント
+Read these before implementing changes:
 
-作業前に以下を読んでください（優先順）:
+1. `docs/GOVERNANCE.md`
+2. `docs/PROJECT_CONTEXT.json`
+3. `docs/ARCHITECTURE.md`
+4. `docs/instructions/INDEX.md`
 
-1. [`docs/instructions/INDEX.md`](../docs/instructions/INDEX.md) — 全体マップ
-2. [`docs/instructions/DATA_MODEL.md`](../docs/instructions/DATA_MODEL.md) — ゼミ種別・型定義（SSOT）
-3. [`docs/instructions/SYSTEM_DESIGN.md`](../docs/instructions/SYSTEM_DESIGN.md) — Edge制約・アーキ原則
-4. [`docs/instructions/CODING_STANDARDS.md`](../docs/instructions/CODING_STANDARDS.md) — コーディング規約
-5. [`docs/instructions/DESIGN_RULES.md`](../docs/instructions/DESIGN_RULES.md) — UIデザインルール
-6. [`docs/instructions/AI_WORKFLOW.md`](../docs/instructions/AI_WORKFLOW.md) — 整合性チェックリスト
+## Project
 
-## 即座に守るべきルール（最重要）
+Group Seminar Calendar 2026 is a Next.js 14 + TypeScript + Tailwind CSS app backed by Firebase Admin SDK and Firestore.
 
-- すべての APIルートに `export const runtime = 'edge'` を付ける
-- D1へのアクセスは `getRequestContext().env.DB` 経由のみ
-- `any` 型を使わない
-- ゼミ種別の色は `lib/types.ts` の `SEMINAR_TYPES` から参照する（ハードコード禁止）
-- 作業完了後は `docs/instructions/AI_WORKFLOW.md` のチェックリストを実行する
+## Rules
 
-## プロジェクト概要
+- Use Firebase Admin SDK only in server-side API route code.
+- Import Firestore access from `lib/firebase-admin.ts`.
+- Do not import `firebase-admin` into client components.
+- Keep Firebase credentials in `.env.local` or deployment secrets.
+- Do not commit `.env.local`, Firebase service account JSON, or private keys.
+- Do not restore deprecated database or setup assumptions.
+- Do not commit or push without explicit user instruction.
+- When implementing a feature or changing project operations, add a memo under `docs/memo` named `YYYY-MM-DD-kebab-case-summary.md`.
+- If architecture, DB, env vars, or setup steps change, update `docs/PROJECT_CONTEXT.json` and affected docs in the same change.
 
-Next.js 14 + Cloudflare Pages + D1 で構築された研究室ゼミ予定管理カレンダー。  
-ゼミ種別: `rinudoku`（輪読）/ `zentai`（全体）/ `kenkyu`（研究共有）  
-担当者ロール: A（発表・進行）/ B（記録）/ C（資料・補佐）
+## Checks
+
+- `npm run docs:check`
+- `npm run lint`
+- `npm run build`
