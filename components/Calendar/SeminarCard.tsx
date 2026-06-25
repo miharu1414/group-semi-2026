@@ -1,6 +1,7 @@
 'use client';
 
-import { Seminar, SEMINAR_TYPES, normalizeAssigneeB } from '@/lib/types';
+import { Seminar, normalizeAssigneeB } from '@/lib/types';
+import { getEventConfig } from '@/lib/activity-config';
 
 interface Props {
   seminar: Seminar;
@@ -8,7 +9,7 @@ interface Props {
 }
 
 export default function SeminarCard({ seminar, onClick }: Props) {
-  const cfg = SEMINAR_TYPES[seminar.type];
+  const cfg = getEventConfig(seminar);
   const bNames = normalizeAssigneeB(seminar.assignee_b);
   const hasAssignees = seminar.assignee_a || bNames.length > 0 || seminar.assignee_c;
   const displayLabel = seminar.type === 'other'

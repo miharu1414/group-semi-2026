@@ -33,6 +33,18 @@ const SEMINARS = [
     assignee_a: '近藤', assignee_b: ['有田', '篠塚'], assignee_c: '並木',
     notes: 'C: 巻末付録B',
   },
+  // ── 10〜12月（次期輪読ゼミ・書籍未定） ──
+  // activity_id: 'reading-oct-2026' でスカイブルーに色分け表示
+  ...['2026-10-07','2026-10-14','2026-10-21','2026-10-28',
+      '2026-11-04','2026-11-11','2026-11-18','2026-11-25',
+      '2026-12-02','2026-12-09','2026-12-16','2026-12-23',
+  ].map(date => ({
+    date, type: 'rinudoku', title: '', custom_label: '',
+    activity_id: 'reading-oct-2026',
+    start_time: '13:10', end_time: '15:30',
+    assignee_a: '', assignee_b: [], assignee_c: '',
+    notes: '',
+  })),
   // 夏合宿（7月）
   {
     date: '2026-07-27', type: 'other', title: '1日目', custom_label: '夏合宿',

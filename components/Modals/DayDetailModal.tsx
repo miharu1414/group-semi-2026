@@ -3,7 +3,8 @@
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { X, Plus, ChevronRight, CalendarDays } from 'lucide-react';
-import { Seminar, SEMINAR_TYPES, normalizeAssigneeB } from '@/lib/types';
+import { Seminar, normalizeAssigneeB } from '@/lib/types';
+import { getEventConfig } from '@/lib/activity-config';
 
 interface Props {
   open: boolean;
@@ -79,7 +80,7 @@ export default function DayDetailModal({
               </div>
             ) : (
               seminars.map((seminar) => {
-                const cfg = SEMINAR_TYPES[seminar.type];
+                const cfg = getEventConfig(seminar);
                 const bNames = normalizeAssigneeB(seminar.assignee_b);
                 const assignees: { role: string; name: string }[] = [
                   ...(seminar.assignee_a ? [{ role: 'A', name: seminar.assignee_a }] : []),

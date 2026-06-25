@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { X, User, CalendarDays } from 'lucide-react';
-import { Seminar, Member, SEMINAR_TYPES, normalizeAssigneeB } from '@/lib/types';
+import { Seminar, Member, normalizeAssigneeB } from '@/lib/types';
 import { getSeminars } from '@/lib/api';
-import { CURRENT_ACTIVITY } from '@/lib/activity-config';
+import { CURRENT_ACTIVITY, getEventConfig } from '@/lib/activity-config';
 
 interface Props {
   open: boolean;
@@ -189,7 +189,7 @@ export default function MemberScheduleModal({ open, members, onClose }: Props) {
                   </thead>
                   <tbody>
                     {rows.map(({ seminar, role }, i) => {
-                      const cfg = SEMINAR_TYPES[seminar.type];
+                      const cfg = getEventConfig(seminar);
                       const dateLabel = format(
                         new Date(seminar.date + 'T00:00:00'),
                         'M月d日（E）',

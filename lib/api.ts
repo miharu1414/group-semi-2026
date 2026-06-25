@@ -1,4 +1,4 @@
-import { Seminar, SeminarFormData, Member, MemberFormData } from './types';
+import { Seminar, SeminarFormData, Member, MemberFormData, Notice } from './types';
 
 const BASE = '/api';
 
@@ -67,4 +67,37 @@ export async function updateMember(id: string, data: MemberFormData): Promise<Me
 export async function deleteMember(id: string): Promise<void> {
   const res = await fetch(`${BASE}/members/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error('Failed to delete member');
+}
+
+// ───── Notices ─────
+
+export async function getNotices(): Promise<Notice[]> {
+  const res = await fetch(`${BASE}/notices`);
+  if (!res.ok) throw new Error('Failed to fetch notices');
+  return res.json();
+}
+
+export async function createNotice(body: string): Promise<Notice> {
+  const res = await fetch(`${BASE}/notices`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ body }),
+  });
+  if (!res.ok) throw new Error('Failed to create notice');
+  return res.json();
+}
+
+export async function updateNotice(id: string, body: string): Promise<Notice> {
+  const res = await fetch(`${BASE}/notices/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ body }),
+  });
+  if (!res.ok) throw new Error('Failed to update notice');
+  return res.json();
+}
+
+export async function deleteNotice(id: string): Promise<void> {
+  const res = await fetch(`${BASE}/notices/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to delete notice');
 }

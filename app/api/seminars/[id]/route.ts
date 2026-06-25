@@ -14,6 +14,7 @@ export async function GET(
       ...data,
       assignee_b: normalizeAssigneeB(data.assignee_b),
       custom_label: (data.custom_label as string) ?? '',
+      activity_id: (data.activity_id as string) ?? '',
       start_time: (data.start_time as string) ?? '',
       end_time: (data.end_time as string) ?? '',
     });
@@ -37,6 +38,7 @@ export async function PUT(
       type?: string;
       title?: string;
       custom_label?: string;
+      activity_id?: string;
       start_time?: string;
       end_time?: string;
       assignee_a?: string;
@@ -50,6 +52,7 @@ export async function PUT(
     if (body.type         !== undefined) updates.type         = body.type;
     if (body.title        !== undefined) updates.title        = body.title;
     if (body.custom_label !== undefined) updates.custom_label = body.custom_label;
+    if (body.activity_id  !== undefined) updates.activity_id  = body.activity_id;
     if (body.start_time   !== undefined) updates.start_time   = body.start_time;
     if (body.end_time     !== undefined) updates.end_time     = body.end_time;
     if (body.assignee_a   !== undefined) updates.assignee_a   = body.assignee_a;

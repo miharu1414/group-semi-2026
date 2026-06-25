@@ -11,6 +11,7 @@ import MembersModal from './Modals/MembersModal';
 import DayDetailModal from './Modals/DayDetailModal';
 import InfoModal from './Modals/InfoModal';
 import MemberScheduleModal from './Modals/MemberScheduleModal';
+import NoticeBoard from './NoticeBoard';
 import { SeminarFormData } from '@/lib/types';
 
 export default function CalendarApp() {
@@ -152,7 +153,7 @@ export default function CalendarApp() {
   const dayDetailSeminars = seminars.filter((s) => s.date === dayDetailDate);
 
   return (
-    <div className="flex flex-col h-dvh">
+    <div className="flex flex-col h-dvh overflow-hidden">
       {/* ── App Header ── */}
       <header className="bg-white border-b border-gray-200 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between shrink-0 shadow-sm">
         {/* Left: Logo + Title */}
@@ -230,19 +231,22 @@ export default function CalendarApp() {
         </div>
       )}
 
-      {/* ── Calendar ── */}
-      <main className="flex-1 overflow-hidden min-h-0">
-        <CalendarView
-          currentMonth={currentMonth}
-          seminars={seminars}
-          loading={loading}
-          onPrevMonth={handlePrevMonth}
-          onNextMonth={handleNextMonth}
-          onToday={handleToday}
-          onDayClick={handleDayClick}
-          onQuickAdd={handleQuickAdd}
-          onSeminarClick={handleSeminarClick}
-        />
+      {/* ── Calendar + Notice Board ── */}
+      <main className="flex-1 overflow-y-auto min-h-0 flex flex-col">
+        <div className="flex-1 min-h-0">
+          <CalendarView
+            currentMonth={currentMonth}
+            seminars={seminars}
+            loading={loading}
+            onPrevMonth={handlePrevMonth}
+            onNextMonth={handleNextMonth}
+            onToday={handleToday}
+            onDayClick={handleDayClick}
+            onQuickAdd={handleQuickAdd}
+            onSeminarClick={handleSeminarClick}
+          />
+        </div>
+        <NoticeBoard />
       </main>
 
       {/* ── Modals ── */}

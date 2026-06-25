@@ -132,14 +132,14 @@ export default function CalendarView({
                 `}
                 onClick={() => isCurrentMonth && onDayClick(dateStr)}
               >
-                {/* Day number + today badge */}
-                <div className="flex items-start justify-between p-1.5 sm:p-2">
-                  <div className="flex flex-col items-center gap-0.5">
+                {/* Day number row: date left / time+quickadd right (same row to save vertical space) */}
+                <div className="flex items-center justify-between px-1 pt-1 pb-0">
+                  <div className="flex flex-col items-center leading-none">
                     <span
                       className={`
-                        text-xs sm:text-sm font-medium w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-full shrink-0
+                        text-xs sm:text-sm font-medium w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full shrink-0
                         ${isCurrentDay
-                          ? 'bg-indigo-600 text-white font-bold ring-4 ring-indigo-200 ring-offset-1 shadow-md'
+                          ? 'bg-indigo-600 text-white font-bold ring-2 ring-indigo-200 ring-offset-1 shadow-sm'
                           : !isCurrentMonth
                           ? 'text-gray-300'
                           : dayOfWeek === 0
@@ -153,36 +153,34 @@ export default function CalendarView({
                       {format(day, 'd')}
                     </span>
                     {isCurrentDay && (
-                      <span className="text-[9px] font-bold text-indigo-500 leading-none tracking-wide">
+                      <span className="text-[8px] font-bold text-indigo-500 leading-none tracking-wide mt-0.5">
                         今日
                       </span>
                     )}
                   </div>
 
-                  {/* Quick-add button on hover */}
-                  {isCurrentMonth && (
-                    <button
-                      className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity w-6 h-6 sm:w-6 sm:h-6 rounded-full bg-indigo-100 hover:bg-indigo-200 active:bg-indigo-300 text-indigo-600 flex items-center justify-center text-sm leading-none shrink-0 mt-0.5 touch-manipulation"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onQuickAdd(dateStr);
-                      }}
-                      title="予定を追加"
-                      aria-label="予定を追加"
-                    >
-                      +
-                    </button>
-                  )}
-                </div>
-
-                {/* Earliest time badge */}
-                {earliestTime && (
-                  <div className="px-1.5 -mt-0.5 pb-0.5">
-                    <span className="text-[9px] sm:text-[10px] text-indigo-500 font-semibold leading-none tabular-nums">
-                      {earliestTime}〜
-                    </span>
+                  {/* Time badge (always) + quick-add overlay (hover only) */}
+                  <div className="relative w-6 h-6 flex items-center justify-center shrink-0">
+                    {earliestTime && (
+                      <span className="text-[9px] sm:text-[10px] text-indigo-500 font-semibold tabular-nums leading-none group-hover:opacity-0 transition-opacity">
+                        {earliestTime}〜
+                      </span>
+                    )}
+                    {isCurrentMonth && (
+                      <button
+                        className="absolute inset-0 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity rounded-full bg-indigo-100 hover:bg-indigo-200 active:bg-indigo-300 text-indigo-600 flex items-center justify-center text-sm leading-none touch-manipulation"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onQuickAdd(dateStr);
+                        }}
+                        title="予定を追加"
+                        aria-label="予定を追加"
+                      >
+                        +
+                      </button>
+                    )}
                   </div>
-                )}
+                </div>
 
                 {/* Seminar Events */}
                 <div className="px-1 pb-1 space-y-0.5">

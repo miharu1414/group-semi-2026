@@ -15,6 +15,7 @@ export async function GET(request: Request) {
         ...data,
         assignee_b: normalizeAssigneeB(data.assignee_b),
         custom_label: (data.custom_label as string) ?? '',
+        activity_id: (data.activity_id as string) ?? '',
         start_time: (data.start_time as string) ?? '',
         end_time: (data.end_time as string) ?? '',
       } as unknown as SeminarDoc;
@@ -36,6 +37,7 @@ export async function POST(request: Request) {
       type: string;
       title?: string;
       custom_label?: string;
+      activity_id?: string;
       start_time?: string;
       end_time?: string;
       assignee_a?: string;
@@ -54,6 +56,7 @@ export async function POST(request: Request) {
       type: body.type,
       title: body.title ?? '',
       custom_label: body.custom_label ?? '',
+      activity_id: body.activity_id ?? '',
       start_time: body.start_time ?? '',
       end_time: body.end_time ?? '',
       assignee_a: body.assignee_a ?? '',

@@ -6,23 +6,20 @@
  * コードの変更はこのファイル 1 か所で完結します。
  *
  * ── 将来の拡張について ──
- * 現時点では "その期間にアクティブな活動は 1 つ" という設計です。
- * 複数の活動を並行管理したい場合は:
- *   1. Seminar に activity_id: string フィールドを追加
- *   2. カレンダー・担当一覧で activity_id をもとに設定を切り替える
- * という拡張が最小コストで行えます。
+ * seminar.activity_id に活動 ID を設定することで、
+ * 同じカレンダー上に複数の活動を色分けして表示できます。
+ * activity_id 未設定の予定は SEMINAR_TYPES のデフォルト色を使います。
  */
+
+import { SEMINAR_TYPES, SeminarTypeConfig } from './types';
+import type { Seminar } from './types';
 
 // ── 型定義 ──────────────────────────────────────────────────
 
 export interface RoleConfig {
-  /** 担当一覧などで使う短縮ラベル。例: '輪読' */
   short: string;
-  /** 概要モーダルに表示する役割説明（箇条書き） */
   description: string[];
-  /** Tailwind: カード背景・ボーダー・テキスト */
   cardClass: string;
-  /** Tailwind: バッジ背景・テキスト・ボーダー */
   badgeClass: string;
 }
 
@@ -32,38 +29,29 @@ export interface TimeFlowStep {
 }
 
 export interface ActivityConfig {
-  /** 一意 ID（将来の seminar.activity_id と対応させる想定） */
   id: string;
-  /** 活動名 / 書籍タイトル */
   name: string;
-  /** サブタイトル（著者名など。省略可） */
   subtitle?: string;
-  /** ゼミの目的 */
   purpose: string;
-  /** 開催場所（省略可） */
   venue?: string;
-  /** 開催スケジュール文言（省略可） */
   scheduleNote?: string;
-  /** 参加者の説明（省略可） */
   participantsNote?: string;
-  /** ロール A / B / C の定義 */
   roles: {
     a: RoleConfig;
     b: RoleConfig;
     c: RoleConfig;
   };
-  /** 予定タイトル入力欄のプレースホルダー */
   titlePlaceholder?: string;
-  /** 一日の進行目安 */
   timeFlow: TimeFlowStep[];
-  /** 全体メモ（省略可） */
   notes?: string[];
+  /** 予定カードの色スキーム。設定時、type ベースのデフォルト色を上書きする */
+  colorScheme?: SeminarTypeConfig;
 }
 
 // ── 活動リスト ───────────────────────────────────────────────
 
 export const ACTIVITIES: ActivityConfig[] = [
-  // ── 現在の活動（〜2026年9月頃） ──
+  // ── 現在の活動（〜2026年9月頃）: 独学で鍛える数理思考２ ──
   {
     id: 'math-thinking-2',
     name: '独学で鍛える数理思考２',
@@ -115,25 +103,73 @@ export const ACTIVITIES: ActivityConfig[] = [
       '本の内容確認だけでなく、関連研究や事例に広げて深めることも大切',
       '10/7以降も毎週水曜日を基本として継続予定',
     ],
+    // colorScheme 未設定 → SEMINAR_TYPES.rinudoku (indigo) をそのまま使用
   },
 
-  // ── 次の活動はここに追記（例） ──
+  // ── 次期活動（2026年10月〜: 書籍・テーマ未定）──
+  {
+    id: 'reading-oct-2026',
+    name: '輪読ゼミ（10月〜）',
+    subtitle: '書籍・テーマ未定',
+    purpose: '（内容確定次第更新予定）',
+    venue: 'ゼミ室 14-02',
+    scheduleNote: '毎週水曜日 3・4限',
+    roles: {
+      a: {
+        short: '輪読',
+        description: ['輪読担当'],
+        cardClass: 'bg-sky-50 border-sky-200 text-sky-900',
+        badgeClass: 'bg-sky-100 text-sky-700 border-sky-200',
+      },
+      b: {
+        short: '関連研究',
+        description: ['関連研究・活用事例の紹介'],
+        cardClass: 'bg-sky-50 border-sky-200 text-sky-900',
+        badgeClass: 'bg-sky-100 text-sky-700 border-sky-200',
+      },
+      c: {
+        short: 'コラム',
+        description: ['コラム・周辺知識の紹介'],
+        cardClass: 'bg-sky-50 border-sky-200 text-sky-900',
+        badgeClass: 'bg-sky-100 text-sky-700 border-sky-200',
+      },
+    },
+    titlePlaceholder: '例: タイトル・章番号など',
+    timeFlow: [],
+    notes: ['10月以降の輪読ゼミ。書籍・テーマは追って決定予定。'],
+    colorScheme: {
+      label: '輪読ゼミ',
+      shortLabel: '輪読',
+      bgClass: 'bg-sky-100',
+      textClass: 'text-sky-800',
+      borderClass: 'border-sky-200',
+      dotClass: 'bg-sky-500',
+      hoverClass: 'hover:bg-sky-200',
+    },
+  },
+
+  // ── さらに次の活動はここに追記 ──
   // {
   //   id: 'next-activity-id',
   //   name: '次の書籍タイトルやテーマ名',
-  //   subtitle: '著者名など',
-  //   purpose: '目的の文章',
-  //   roles: {
-  //     a: { short: 'A役割名', description: ['...'], cardClass: '...', badgeClass: '...' },
-  //     b: { short: 'B役割名', description: ['...'], cardClass: '...', badgeClass: '...' },
-  //     c: { short: 'C役割名', description: ['...'], cardClass: '...', badgeClass: '...' },
-  //   },
-  //   timeFlow: [{ time: '60分', desc: '...' }],
+  //   ...
+  //   colorScheme: { bgClass: '...', textClass: '...', ... },
   // },
 ];
 
-/**
- * 現在アクティブな活動設定。
- * 活動を切り替えるときはここを変更する。
- */
+/** 現在アクティブな活動設定（概要モーダルに表示される） */
 export const CURRENT_ACTIVITY: ActivityConfig = ACTIVITIES[0];
+
+/**
+ * seminar.activity_id に対応する色設定を返す。
+ * activity_id 未設定 or 不明の場合は SEMINAR_TYPES のデフォルト色を使用。
+ */
+export function getEventConfig(
+  seminar: Pick<Seminar, 'type' | 'activity_id'>
+): SeminarTypeConfig {
+  if (seminar.activity_id) {
+    const activity = ACTIVITIES.find((a) => a.id === seminar.activity_id);
+    if (activity?.colorScheme) return activity.colorScheme;
+  }
+  return SEMINAR_TYPES[seminar.type];
+}
