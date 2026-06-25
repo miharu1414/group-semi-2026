@@ -179,19 +179,26 @@ export default function CalendarApp() {
   const dayDetailSeminars = seminars.filter((s) => s.date === dayDetailDate);
 
   return (
-    <div className="flex flex-col h-dvh">
+    <div className="flex flex-col h-dvh relative">
+      {/* ── Decorative Background spots ── */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-slate-50/50">
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-br from-indigo-500/10 to-transparent blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[45%] h-[45%] rounded-full bg-gradient-to-tr from-teal-500/5 to-transparent blur-[100px]" />
+      </div>
+
       {/* ── App Header ── */}
-      <header className="bg-white border-b border-gray-200 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between shrink-0 shadow-sm">
+      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between shrink-0 shadow-sm z-30">
         {/* Left: Logo + Title */}
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0">
-            <span className="text-white text-sm font-bold">ゼ</span>
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="w-8.5 h-8.5 rounded-lg overflow-hidden shrink-0 border border-slate-200 shadow-sm bg-white">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-sm sm:text-base font-bold text-gray-900 leading-tight truncate">
+            <h1 className="text-sm sm:text-base font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-700 leading-tight truncate">
               班ゼミカレンダー
             </h1>
-            <p className="text-xs text-gray-500 leading-tight">2026</p>
+            <p className="text-[10px] sm:text-xs font-semibold text-slate-400 leading-tight mt-0.5">2026</p>
           </div>
         </div>
 
