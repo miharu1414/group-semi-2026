@@ -73,12 +73,12 @@ export default function MemberScheduleModal({ open, members, onClose }: Props) {
 
   const rows = selected ? getRoleRows(allSeminars, selected) : [];
 
-  // 役割ごとの集計
+  // 役割ごとの集計（RL を参照して CURRENT_ACTIVITY 変更に追随）
   const counts = { A: 0, B: 0, C: 0 };
   rows.forEach((r) => {
-    if (r.role === 'A（輪読）')     counts.A++;
-    if (r.role === 'B（関連研究）') counts.B++;
-    if (r.role === 'C（コラム）')   counts.C++;
+    if (r.role === RL.a) counts.A++;
+    if (r.role === RL.b) counts.B++;
+    if (r.role === RL.c) counts.C++;
   });
 
   return (

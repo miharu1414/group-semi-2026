@@ -73,23 +73,23 @@ export default function NoticeBoard() {
   const cancelEdit = () => setEditingId(null);
 
   return (
-    <section className="border-t border-gray-200 bg-gray-50">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4">
+    <section className="border-t border-gray-200 bg-gray-50 shrink-0 max-h-[28vh] flex flex-col">
+      {/* Fixed header */}
+      <div className="px-4 sm:px-6 pt-3 pb-2 flex items-center justify-between shrink-0">
+        <h2 className="text-sm font-semibold text-gray-700">
+          メモ・連絡事項
+        </h2>
+        <button
+          onClick={() => { setAdding(true); setEditingId(null); }}
+          className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-2 py-1 rounded-lg transition-colors"
+        >
+          <Plus size={13} />
+          追加
+        </button>
+      </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-gray-700">
-            メモ・連絡事項
-          </h2>
-          <button
-            onClick={() => { setAdding(true); setEditingId(null); }}
-            className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-2 py-1 rounded-lg transition-colors"
-          >
-            <Plus size={13} />
-            追加
-          </button>
-        </div>
-
+      {/* Scrollable body */}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-3">
         {/* New entry */}
         {adding && (
           <div className="mb-3 flex gap-2 items-start">
@@ -173,7 +173,7 @@ export default function NoticeBoard() {
                     <p className="flex-1 text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words">
                       {notice.body}
                     </p>
-                    <div className="flex gap-1 shrink-0 opacity-0 group-hover/item:opacity-100 sm:opacity-0 sm:group-hover/item:opacity-100 transition-opacity">
+                    <div className="flex gap-1 shrink-0 sm:opacity-0 sm:group-hover/item:opacity-100 sm:transition-opacity">
                       <button
                         onClick={() => startEdit(notice)}
                         className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors touch-manipulation"

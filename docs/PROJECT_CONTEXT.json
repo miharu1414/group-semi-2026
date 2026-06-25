@@ -33,8 +33,15 @@
   },
   "firestoreCollections": [
     "seminars",
-    "members"
+    "members",
+    "notices"
   ],
+  "seminarFields": {
+    "activity_id": "string — optional; references ACTIVITIES[].id in lib/activity-config.ts. Set only via seed scripts. Empty string when unset (not null). Controls calendar color and InfoModal content.",
+    "start_time": "string — HH:MM format, empty if unset",
+    "end_time": "string — HH:MM format, empty if unset",
+    "custom_label": "string — display label when type='other', empty otherwise"
+  },
   "activityExtensibility": {
     "configFile": "lib/activity-config.ts",
     "howToSwitch": "CURRENT_ACTIVITY を ACTIVITIES 配列の別エントリに切り替えるだけ。",

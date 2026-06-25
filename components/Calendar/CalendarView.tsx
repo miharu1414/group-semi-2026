@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   format,
   startOfMonth,
@@ -40,6 +41,8 @@ export default function CalendarView({
   onQuickAdd,
   onSeminarClick,
 }: Props) {
+  const [hoveredDate, setHoveredDate] = useState<string | null>(null);
+
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
   const calStart = startOfWeek(monthStart, { weekStartsOn: 0 });
@@ -116,25 +119,40 @@ export default function CalendarView({
               .filter(Boolean)
               .sort()[0] ?? null;
 
+            const isHovered = hoveredDate === dateStr;
+
             return (
               <div
                 key={dateStr}
                 className={`
-                  relative border-r border-b border-gray-200 group
-                  overflow-hidden transition-colors cursor-pointer
+                  relative border-r border-b border-gray-200 transition-colors cursor-pointer
+                  ${isHovered ? 'overflow-visible' : 'overflow-hidden'}
                   ${!isCurrentMonth
                     ? 'bg-gray-50'
                     : isCurrentDay
-                    ? 'bg-indigo-50 hover:bg-indigo-100/70'
-                    : 'bg-white hover:bg-indigo-50/30'
+                    ? isHovered ? 'bg-indigo-100/70' : 'bg-indigo-50'
+                    : isHovered ? 'bg-indigo-50/30' : 'bg-white'
                   }
                   ${isCurrentDay ? 'border-l-2 border-l-indigo-400' : idx % 7 === 0 ? 'border-l' : ''}
                 `}
+                style={{ zIndex: isHovered ? 20 : undefined }}
+                onMouseMove={(e) => {
+                  if (!isCurrentMonth) return;
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  if (e.clientY <= rect.bottom) {
+                    if (hoveredDate !== dateStr) setHoveredDate(dateStr);
+                  } else {
+                    if (hoveredDate === dateStr) setHoveredDate(null);
+                  }
+                }}
+                onMouseLeave={() => {
+                  if (hoveredDate === dateStr) setHoveredDate(null);
+                }}
                 onClick={() => isCurrentMonth && onDayClick(dateStr)}
               >
-                {/* Day number row: date left / time+quickadd right (same row to save vertical space) */}
-                <div className="flex items-center justify-between px-1 pt-1 pb-0">
-                  <div className="flex flex-col items-center leading-none">
+                {/* Header: date + time stacked on left, quickadd on right */}
+                <div className="flex items-start justify-between px-1 pt-1 pb-0">
+                  <div className="flex flex-col items-start leading-none gap-px">
                     <span
                       className={`
                         text-xs sm:text-sm font-medium w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full shrink-0
@@ -153,46 +171,45 @@ export default function CalendarView({
                       {format(day, 'd')}
                     </span>
                     {isCurrentDay && (
-                      <span className="text-[8px] font-bold text-indigo-500 leading-none tracking-wide mt-0.5">
+                      <span className="text-[8px] font-bold text-indigo-500 leading-none tracking-wide">
                         今日
                       </span>
                     )}
-                  </div>
-
-                  {/* Time badge (always) + quick-add overlay (hover only) */}
-                  <div className="relative w-6 h-6 flex items-center justify-center shrink-0">
                     {earliestTime && (
-                      <span className="text-[9px] sm:text-[10px] text-indigo-500 font-semibold tabular-nums leading-none group-hover:opacity-0 transition-opacity">
+                      <span className="text-[9px] sm:text-[10px] text-indigo-400 font-semibold tabular-nums leading-none">
                         {earliestTime}〜
                       </span>
                     )}
-                    {isCurrentMonth && (
-                      <button
-                        className="absolute inset-0 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity rounded-full bg-indigo-100 hover:bg-indigo-200 active:bg-indigo-300 text-indigo-600 flex items-center justify-center text-sm leading-none touch-manipulation"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onQuickAdd(dateStr);
-                        }}
-                        title="予定を追加"
-                        aria-label="予定を追加"
-                      >
-                        +
-                      </button>
-                    )}
                   </div>
-                </div>
 
-                {/* Seminar Events */}
-                <div className="px-1 pb-1 space-y-0.5">
-                  {daySeminars.map((seminar) => (
-                    <SeminarCard
-                      key={seminar.id}
-                      seminar={seminar}
+                  {/* Quick-add button (hover only) */}
+                  {isCurrentMonth && (
+                    <button
+                      className={`transition-opacity w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-indigo-100 hover:bg-indigo-200 active:bg-indigo-300 text-indigo-600 flex items-center justify-center text-sm leading-none shrink-0 touch-manipulation focus-visible:opacity-100 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        onSeminarClick(seminar);
+                        onQuickAdd(dateStr);
                       }}
-                    />
+                      title="予定を追加"
+                      aria-label="予定を追加"
+                    >
+                      +
+                    </button>
+                  )}
+                </div>
+
+                {/* Seminar Events — white-bg popup on hover */}
+                <div className={`px-1 space-y-0.5 mt-0.5 ${isHovered ? 'bg-white shadow-md rounded-b-lg pb-2' : 'pb-1'}`}>
+                  {daySeminars.map((seminar) => (
+                    <div key={seminar.id}>
+                      <SeminarCard
+                        seminar={seminar}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSeminarClick(seminar);
+                        }}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>

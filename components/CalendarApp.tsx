@@ -153,7 +153,7 @@ export default function CalendarApp() {
   const dayDetailSeminars = seminars.filter((s) => s.date === dayDetailDate);
 
   return (
-    <div className="flex flex-col h-dvh overflow-hidden">
+    <div className="flex flex-col h-dvh">
       {/* ── App Header ── */}
       <header className="bg-white border-b border-gray-200 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between shrink-0 shadow-sm">
         {/* Left: Logo + Title */}
@@ -232,7 +232,7 @@ export default function CalendarApp() {
       )}
 
       {/* ── Calendar + Notice Board ── */}
-      <main className="flex-1 overflow-y-auto min-h-0 flex flex-col">
+      <main className="flex-1 min-h-0 flex flex-col">
         <div className="flex-1 min-h-0">
           <CalendarView
             currentMonth={currentMonth}
