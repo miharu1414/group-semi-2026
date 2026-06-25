@@ -58,8 +58,8 @@ export const ACTIVITIES: ActivityConfig[] = [
     subtitle: '古嶋十潤 著',
     purpose:
       '蓮池研究メンバーの研究に対して、自分なりのコメント・意見・疑問・示唆を持てるようになること',
-    venue: 'ゼミ室 14-02',
-    scheduleNote: '毎週水曜日 3・4限（2週間で1章程度が目安）',
+    venue: 'ゼミ室 14-02（基本）',
+    scheduleNote: '毎週水曜日 3・4限（基本）\n※日時・場所は変更になる場合があります',
     participantsNote: 'M2: 並木 / M1: 近藤 / B4: 有田・篠塚（院試後から参加）',
     roles: {
       a: {
