@@ -9,7 +9,6 @@ import {
   eachDayOfInterval,
   isSameMonth,
   isToday,
-  isSameDay,
 } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -24,6 +23,7 @@ interface Props {
   onNextMonth: () => void;
   onToday: () => void;
   onDayClick: (dateStr: string) => void;
+  onQuickAdd: (dateStr: string) => void;
   onSeminarClick: (seminar: Seminar) => void;
 }
 
@@ -37,9 +37,9 @@ export default function CalendarView({
   onNextMonth,
   onToday,
   onDayClick,
+  onQuickAdd,
   onSeminarClick,
 }: Props) {
-  // Build calendar grid (Mon-Sun)
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
   const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
@@ -118,38 +118,50 @@ export default function CalendarView({
                 className={`
                   relative border-r border-b border-gray-200 group
                   transition-colors cursor-pointer
-                  ${!isCurrentMonth ? 'bg-gray-50' : 'bg-white hover:bg-indigo-50/30'}
-                  ${idx % 7 === 0 ? 'border-l' : ''}
+                  ${!isCurrentMonth
+                    ? 'bg-gray-50'
+                    : isCurrentDay
+                    ? 'bg-indigo-50 hover:bg-indigo-100/70'
+                    : 'bg-white hover:bg-indigo-50/30'
+                  }
+                  ${isCurrentDay ? 'border-l-2 border-l-indigo-400' : idx % 7 === 0 ? 'border-l' : ''}
                 `}
                 onClick={() => isCurrentMonth && onDayClick(dateStr)}
               >
-                {/* Day number */}
+                {/* Day number + today badge */}
                 <div className="flex items-start justify-between p-1.5 sm:p-2">
-                  <span
-                    className={`
-                      text-xs sm:text-sm font-medium w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-full shrink-0
-                      ${isCurrentDay
-                        ? 'bg-indigo-600 text-white font-bold'
-                        : !isCurrentMonth
-                        ? 'text-gray-300'
-                        : dayOfWeek === 0
-                        ? 'text-red-400'
-                        : dayOfWeek === 6
-                        ? 'text-blue-400'
-                        : 'text-gray-700'
-                      }
-                    `}
-                  >
-                    {format(day, 'd')}
-                  </span>
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span
+                      className={`
+                        text-xs sm:text-sm font-medium w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-full shrink-0
+                        ${isCurrentDay
+                          ? 'bg-indigo-600 text-white font-bold ring-4 ring-indigo-200 ring-offset-1 shadow-md'
+                          : !isCurrentMonth
+                          ? 'text-gray-300'
+                          : dayOfWeek === 0
+                          ? 'text-red-400'
+                          : dayOfWeek === 6
+                          ? 'text-blue-400'
+                          : 'text-gray-700'
+                        }
+                      `}
+                    >
+                      {format(day, 'd')}
+                    </span>
+                    {isCurrentDay && (
+                      <span className="text-[9px] font-bold text-indigo-500 leading-none tracking-wide">
+                        今日
+                      </span>
+                    )}
+                  </div>
 
-                  {/* Add button on hover */}
+                  {/* Quick-add button on hover */}
                   {isCurrentMonth && (
                     <button
-                      className="opacity-0 group-hover:opacity-100 transition-opacity w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-600 flex items-center justify-center text-sm leading-none shrink-0"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-600 flex items-center justify-center text-sm leading-none shrink-0 mt-0.5"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onDayClick(dateStr);
+                        onQuickAdd(dateStr);
                       }}
                       title="予定を追加"
                     >

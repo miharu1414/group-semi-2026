@@ -8,6 +8,7 @@ import { getSeminars, createSeminar, updateSeminar, deleteSeminar, getMembers } 
 import CalendarView from './Calendar/CalendarView';
 import SeminarModal from './Modals/SeminarModal';
 import MembersModal from './Modals/MembersModal';
+import DayDetailModal from './Modals/DayDetailModal';
 import { SeminarFormData } from '@/lib/types';
 
 export default function CalendarApp() {
@@ -17,7 +18,11 @@ export default function CalendarApp() {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
 
-  // Modal state
+  // DayDetail modal state
+  const [dayDetailOpen, setDayDetailOpen] = useState(false);
+  const [dayDetailDate, setDayDetailDate] = useState('');
+
+  // Seminar modal state
   const [seminarModalOpen, setSeminarModalOpen] = useState(false);
   const [membersModalOpen, setMembersModalOpen] = useState(false);
   const [editingSeminar, setEditingSeminar] = useState<Seminar | null>(null);
@@ -66,14 +71,41 @@ export default function CalendarApp() {
     setCurrentMonth(startOfMonth(new Date()));
   };
 
-  // ── Seminar CRUD ─────────────────────────────────────
+  // ── Day Detail Modal ─────────────────────────────────
+  /** カレンダーの日付セルをクリック → DayDetailModal を開く */
   const handleDayClick = (dateStr: string) => {
+    setDayDetailDate(dateStr);
+    setDayDetailOpen(true);
+  };
+
+  /** DayDetailModal の「予定を追加」ボタン → SeminarModal（新規）を開く */
+  const handleDayDetailAdd = () => {
+    setDayDetailOpen(false);
+    setEditingSeminar(null);
+    setDefaultDate(dayDetailDate);
+    setSavingError(null);
+    setSeminarModalOpen(true);
+  };
+
+  /** DayDetailModal の予定カードをクリック → SeminarModal（編集）を開く */
+  const handleDayDetailEdit = (seminar: Seminar) => {
+    setDayDetailOpen(false);
+    setEditingSeminar(seminar);
+    setDefaultDate(seminar.date);
+    setSavingError(null);
+    setSeminarModalOpen(true);
+  };
+
+  // ── Quick add (+ button on calendar cell) ────────────
+  /** カレンダーの + ボタン → SeminarModal（新規）を直接開く */
+  const handleQuickAdd = (dateStr: string) => {
     setEditingSeminar(null);
     setDefaultDate(dateStr);
     setSavingError(null);
     setSeminarModalOpen(true);
   };
 
+  // ── Seminar card click on calendar (direct edit) ─────
   const handleSeminarClick = (seminar: Seminar) => {
     setEditingSeminar(seminar);
     setDefaultDate(seminar.date);
@@ -81,6 +113,7 @@ export default function CalendarApp() {
     setSeminarModalOpen(true);
   };
 
+  // ── Seminar CRUD ─────────────────────────────────────
   const handleSeminarSave = async (data: SeminarFormData) => {
     setSavingError(null);
     try {
@@ -89,7 +122,6 @@ export default function CalendarApp() {
         setSeminars((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
       } else {
         const created = await createSeminar(data);
-        // only add if in current month view
         if (created.date.startsWith(monthKey)) {
           setSeminars((prev) => [...prev, created].sort((a, b) => a.date.localeCompare(b.date)));
         }
@@ -117,6 +149,9 @@ export default function CalendarApp() {
   const handleMembersChange = (updated: Member[]) => {
     setMembers(updated);
   };
+
+  // Seminars for the selected day (used by DayDetailModal)
+  const dayDetailSeminars = seminars.filter((s) => s.date === dayDetailDate);
 
   return (
     <div className="flex flex-col h-screen">
@@ -180,9 +215,20 @@ export default function CalendarApp() {
           onNextMonth={handleNextMonth}
           onToday={handleToday}
           onDayClick={handleDayClick}
+          onQuickAdd={handleQuickAdd}
           onSeminarClick={handleSeminarClick}
         />
       </main>
+
+      {/* ── Day Detail Modal ── */}
+      <DayDetailModal
+        open={dayDetailOpen}
+        dateStr={dayDetailDate}
+        seminars={dayDetailSeminars}
+        onClose={() => setDayDetailOpen(false)}
+        onAdd={handleDayDetailAdd}
+        onEdit={handleDayDetailEdit}
+      />
 
       {/* ── Seminar Modal ── */}
       <SeminarModal
