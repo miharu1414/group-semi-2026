@@ -42,6 +42,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local helper scripts
-rebase.bat
+# local helper scripts (bat files are machine-specific, never commit)
+*.bat
 rebase_log.txt
