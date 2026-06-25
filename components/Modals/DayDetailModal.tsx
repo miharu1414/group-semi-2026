@@ -111,7 +111,14 @@ export default function DayDetailModal({
                           </span>
                         )}
                       </div>
-                      <ChevronRight size={14} className={`${cfg.textClass} opacity-40 shrink-0`} />
+                      <div className="flex items-center gap-2 shrink-0">
+                        {seminar.start_time && (
+                          <span className={`text-xs font-semibold tabular-nums ${cfg.textClass} opacity-70`}>
+                            {seminar.start_time}{seminar.end_time ? `〜${seminar.end_time}` : '〜'}
+                          </span>
+                        )}
+                        <ChevronRight size={14} className={`${cfg.textClass} opacity-40`} />
+                      </div>
                     </div>
 
                     {/* Assignees */}

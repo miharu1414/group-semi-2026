@@ -33,6 +33,22 @@ const SEMINARS = [
     assignee_a: '近藤', assignee_b: ['有田', '篠塚'], assignee_c: '並木',
     notes: 'C: 巻末付録B',
   },
+  // 夏合宿（7月）
+  {
+    date: '2026-07-27', type: 'other', title: '1日目', custom_label: '夏合宿',
+    assignee_a: '', assignee_b: [], assignee_c: '',
+    notes: '',
+  },
+  {
+    date: '2026-07-28', type: 'other', title: '2日目', custom_label: '夏合宿',
+    assignee_a: '', assignee_b: [], assignee_c: '',
+    notes: '',
+  },
+  {
+    date: '2026-07-29', type: 'other', title: '3日目', custom_label: '夏合宿',
+    assignee_a: '', assignee_b: [], assignee_c: '',
+    notes: '',
+  },
   // ── 8月 ──
   {
     date: '2026-08-05', type: 'rinudoku', title: '第3章',

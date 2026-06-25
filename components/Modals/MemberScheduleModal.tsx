@@ -197,7 +197,12 @@ export default function MemberScheduleModal({ open, members, onClose }: Props) {
                           }`}
                         >
                           <td className="py-2.5 px-2 whitespace-nowrap text-gray-700 font-medium text-xs sm:text-sm">
-                            {dateLabel}
+                            <p>{dateLabel}</p>
+                            {seminar.start_time && (
+                              <p className="text-[10px] text-indigo-500 font-semibold tabular-nums mt-0.5">
+                                {seminar.start_time}{seminar.end_time ? `〜${seminar.end_time}` : '〜'}
+                              </p>
+                            )}
                           </td>
                           <td className="py-2.5 px-2">
                             <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border font-medium ${cfg.bgClass} ${cfg.textClass} ${cfg.borderClass}`}>

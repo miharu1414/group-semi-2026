@@ -55,6 +55,8 @@ export interface Seminar {
   type: SeminarType;
   title: string;
   custom_label: string;
+  start_time: string;
+  end_time: string;
   assignee_a: string;
   assignee_b: string[];
   assignee_c: string;
@@ -76,6 +78,8 @@ export interface SeminarFormData {
   type: SeminarType;
   title: string;
   custom_label: string;
+  start_time: string;
+  end_time: string;
   assignee_a: string;
   assignee_b: string[];
   assignee_c: string;

@@ -22,6 +22,8 @@ const EMPTY_FORM: SeminarFormData = {
   type: 'rinudoku',
   title: '',
   custom_label: '',
+  start_time: '',
+  end_time: '',
   assignee_a: '',
   assignee_b: [],
   assignee_c: '',
@@ -52,6 +54,8 @@ export default function SeminarModal({
           type: seminar.type,
           title: seminar.title,
           custom_label: seminar.custom_label ?? '',
+          start_time: seminar.start_time ?? '',
+          end_time: seminar.end_time ?? '',
           assignee_a: seminar.assignee_a,
           assignee_b: normalizeAssigneeB(seminar.assignee_b),
           assignee_c: seminar.assignee_c,
@@ -170,6 +174,33 @@ export default function SeminarModal({
                 onChange={(e) => set('date', e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow"
               />
+            </div>
+
+            {/* Time */}
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">
+                時刻（任意）
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">開始</p>
+                  <input
+                    type="time"
+                    value={form.start_time}
+                    onChange={(e) => set('start_time', e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow"
+                  />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">終了</p>
+                  <input
+                    type="time"
+                    value={form.end_time}
+                    onChange={(e) => set('end_time', e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Type — 2×2 grid */}

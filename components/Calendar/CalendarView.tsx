@@ -111,6 +111,10 @@ export default function CalendarView({
             const isCurrentDay = isToday(day);
             const daySeminars = seminarsByDate[dateStr] ?? [];
             const dayOfWeek = day.getDay(); // 0=Sun, 6=Sat
+            const earliestTime = daySeminars
+              .map((s) => s.start_time)
+              .filter(Boolean)
+              .sort()[0] ?? null;
 
             return (
               <div
@@ -170,6 +174,15 @@ export default function CalendarView({
                     </button>
                   )}
                 </div>
+
+                {/* Earliest time badge */}
+                {earliestTime && (
+                  <div className="px-1.5 -mt-0.5 pb-0.5">
+                    <span className="text-[9px] sm:text-[10px] text-indigo-500 font-semibold leading-none tabular-nums">
+                      {earliestTime}〜
+                    </span>
+                  </div>
+                )}
 
                 {/* Seminar Events */}
                 <div className="px-1 pb-1 space-y-0.5">
