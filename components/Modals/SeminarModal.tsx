@@ -23,6 +23,7 @@ const EMPTY_FORM: SeminarFormData = {
   type: 'rinudoku',
   title: '',
   custom_label: '',
+  activity_id: CURRENT_ACTIVITY.id,
   start_time: '',
   end_time: '',
   assignee_a: '',
@@ -55,6 +56,7 @@ export default function SeminarModal({
           type: seminar.type,
           title: seminar.title,
           custom_label: seminar.custom_label ?? '',
+          activity_id: seminar.activity_id || CURRENT_ACTIVITY.id,
           start_time: seminar.start_time ?? '',
           end_time: seminar.end_time ?? '',
           assignee_a: seminar.assignee_a,
@@ -63,7 +65,7 @@ export default function SeminarModal({
           notes: seminar.notes,
         });
       } else {
-        setForm({ ...EMPTY_FORM, date: defaultDate });
+        setForm({ ...EMPTY_FORM, date: defaultDate, activity_id: CURRENT_ACTIVITY.id });
       }
     }
   }, [open, seminar, defaultDate]);

@@ -56,6 +56,16 @@ body {
   backdrop-filter: blur(4px);
 }
 
+.calendar-month-grid {
+  grid-auto-rows: 104px;
+}
+
+@media (min-width: 640px) {
+  .calendar-month-grid {
+    grid-auto-rows: clamp(80px, 14vw, 120px);
+  }
+}
+
 /* ── Mobile / Touch optimizations ─────────────────────────── */
 
 /* Remove grey flash on tap (iOS Safari / Android Chrome) */

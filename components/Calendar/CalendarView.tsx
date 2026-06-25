@@ -13,7 +13,8 @@ import {
 } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Seminar, SEMINAR_TYPES } from '@/lib/types';
+import { Seminar } from '@/lib/types';
+import { getEventConfig } from '@/lib/activity-config';
 import SeminarCard from './SeminarCard';
 
 interface Props {
@@ -54,15 +55,21 @@ export default function CalendarView({
     if (!seminarsByDate[s.date]) seminarsByDate[s.date] = [];
     seminarsByDate[s.date].push(s);
   });
+  Object.values(seminarsByDate).forEach((items) => {
+    items.sort((a, b) => {
+      const timeCompare = (a.start_time || '99:99').localeCompare(b.start_time || '99:99');
+      return timeCompare !== 0 ? timeCompare : a.title.localeCompare(b.title);
+    });
+  });
 
   return (
     <div className="flex flex-col">
       <div className="shrink-0">
         {/* Month Navigation Header */}
-        <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center gap-3">
+        <div className="bg-white border-b border-gray-200 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3">
           <button
             onClick={onToday}
-            className="text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-300 transition-colors"
+            className="text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 sm:py-1.5 rounded-lg border border-gray-300 transition-colors shrink-0"
           >
             今日
           </button>
@@ -82,11 +89,11 @@ export default function CalendarView({
               <ChevronRight size={18} />
             </button>
           </div>
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 min-w-0 truncate">
             {format(currentMonth, 'yyyy年 M月', { locale: ja })}
           </h2>
           {loading && (
-            <span className="ml-auto text-xs text-gray-400 animate-pulse">読み込み中...</span>
+            <span className="ml-auto hidden min-[360px]:inline text-xs text-gray-400 animate-pulse">読み込み中...</span>
           )}
         </div>
 
@@ -108,10 +115,8 @@ export default function CalendarView({
       </div>
 
       {/* Calendar Grid — fixed row height so cells never expand beyond clamp value */}
-      <div className="grid grid-cols-7 border-l border-t border-gray-200"
-        style={{ gridAutoRows: 'clamp(80px, 14vw, 120px)' }}
-      >
-        {days.map((day, idx) => {
+      <div className="calendar-month-grid grid grid-cols-7 border-l border-t border-gray-200">
+        {days.map((day) => {
           const dateStr = format(day, 'yyyy-MM-dd');
           const isCurrentMonth = isSameMonth(day, currentMonth);
           const isCurrentDay = isToday(day);
@@ -156,8 +161,8 @@ export default function CalendarView({
               onClick={() => isCurrentMonth && onDayClick(dateStr)}
             >
               {/* Header: date + time stacked on left, quickadd on right */}
-              <div className="flex items-start justify-between px-1 pt-1 pb-0">
-                <div className="flex flex-col items-start leading-none gap-px">
+              <div className="flex items-start justify-between px-1.5 sm:px-1 pt-1 pb-0">
+                <div className="flex flex-col items-start leading-none gap-0.5 min-w-0">
                   <span
                     className={`
                       text-xs sm:text-sm font-medium w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full shrink-0
@@ -176,12 +181,12 @@ export default function CalendarView({
                     {format(day, 'd')}
                   </span>
                   {isCurrentDay && (
-                    <span className="text-[8px] font-bold text-indigo-500 leading-none tracking-wide">
+                    <span className="text-[8px] font-bold text-indigo-500 leading-none">
                       今日
                     </span>
                   )}
                   {earliestTime && (
-                    <span className="text-[9px] sm:text-[10px] text-indigo-400 font-semibold tabular-nums leading-none">
+                    <span className="text-[9px] sm:text-[10px] text-indigo-500 font-semibold tabular-nums leading-none">
                       {earliestTime}〜
                     </span>
                   )}
@@ -203,19 +208,38 @@ export default function CalendarView({
                 )}
               </div>
 
-              {/* Seminar Events
-                  Mobile  → thin segmented color bar at cell bottom (tap to see details)
-                  Desktop → full SeminarCards with hover popup */}
-
-              {/* Mobile: segmented color bar (one segment per event type, up to 4) */}
+              {/* Mobile: readable compact event chips (tap day to see details) */}
               {isCurrentMonth && daySeminars.length > 0 && (
-                <div className="sm:hidden absolute bottom-0 inset-x-0 h-[3px] flex overflow-hidden">
-                  {daySeminars.slice(0, 4).map((s) => (
-                    <div
-                      key={s.id}
-                      className={`flex-1 h-full ${SEMINAR_TYPES[s.type]?.dotClass ?? 'bg-gray-400'}`}
-                    />
-                  ))}
+                <div className="sm:hidden mt-1 space-y-0.5 px-1 pb-1">
+                  {daySeminars.slice(0, 2).map((seminar) => {
+                    const cfg = getEventConfig(seminar);
+                    const label = seminar.type === 'other'
+                      ? (seminar.custom_label || 'その他')
+                      : cfg.shortLabel;
+                    return (
+                      <div
+                        key={seminar.id}
+                        className={`min-w-0 rounded border px-1 py-0.5 leading-none ${cfg.bgClass} ${cfg.borderClass}`}
+                      >
+                        <div className="flex items-center gap-0.5 min-w-0">
+                          <span className={`w-1.5 h-1.5 rounded-full ${cfg.dotClass} shrink-0`} />
+                          <span className={`truncate text-[10px] font-semibold ${cfg.textClass}`}>
+                            {label}
+                          </span>
+                        </div>
+                        {seminar.title && (
+                          <p className={`mt-0.5 truncate text-[9px] ${cfg.textClass} opacity-70`}>
+                            {seminar.title}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {daySeminars.length > 2 && (
+                    <div className="text-[10px] font-semibold text-gray-500 leading-none px-1 pt-0.5">
+                      +{daySeminars.length - 2}件
+                    </div>
+                  )}
                 </div>
               )}
 

@@ -79,6 +79,7 @@ export interface SeminarFormData {
   type: SeminarType;
   title: string;
   custom_label: string;
+  activity_id: string;
   start_time: string;
   end_time: string;
   assignee_a: string;

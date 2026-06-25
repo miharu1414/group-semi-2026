@@ -14,6 +14,18 @@ import MemberScheduleModal from './Modals/MemberScheduleModal';
 import NoticeBoard from './NoticeBoard';
 import { SeminarFormData } from '@/lib/types';
 
+function sortSeminars(items: Seminar[]) {
+  return [...items].sort((a, b) => {
+    const dateCompare = a.date.localeCompare(b.date);
+    if (dateCompare !== 0) return dateCompare;
+
+    const timeCompare = (a.start_time || '99:99').localeCompare(b.start_time || '99:99');
+    if (timeCompare !== 0) return timeCompare;
+
+    return a.title.localeCompare(b.title);
+  });
+}
+
 export default function CalendarApp() {
   const [currentMonth, setCurrentMonth] = useState<Date>(startOfMonth(new Date()));
   const [seminars, setSeminars] = useState<Seminar[]>([]);
@@ -41,7 +53,7 @@ export default function CalendarApp() {
     setFetchError(false);
     try {
       const [sems, mems] = await Promise.all([getSeminars(monthKey), getMembers()]);
-      setSeminars(sems);
+      setSeminars(sortSeminars(sems));
       setMembers(mems);
     } catch (e) {
       console.error(e);
@@ -119,11 +131,16 @@ export default function CalendarApp() {
     try {
       if (editingSeminar) {
         const updated = await updateSeminar(editingSeminar.id, data);
-        setSeminars((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
+        setSeminars((prev) => {
+          const next = updated.date.startsWith(monthKey)
+            ? prev.map((s) => (s.id === updated.id ? updated : s))
+            : prev.filter((s) => s.id !== updated.id);
+          return sortSeminars(next);
+        });
       } else {
         const created = await createSeminar(data);
         if (created.date.startsWith(monthKey)) {
-          setSeminars((prev) => [...prev, created].sort((a, b) => a.date.localeCompare(b.date)));
+          setSeminars((prev) => sortSeminars([...prev, created]));
         }
       }
       setSeminarModalOpen(false);
