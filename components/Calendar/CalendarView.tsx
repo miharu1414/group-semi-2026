@@ -57,8 +57,7 @@ export default function CalendarView({
 
   return (
     <div className="flex flex-col">
-      {/* Month nav + Weekday header — sticky together so both scroll away together */}
-      <div className="sticky top-0 z-10 shrink-0">
+      <div className="shrink-0">
         {/* Month Navigation Header */}
         <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center gap-3">
           <button
