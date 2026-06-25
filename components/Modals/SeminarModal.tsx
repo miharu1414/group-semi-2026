@@ -136,7 +136,7 @@ export default function SeminarModal({
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/40 z-40" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/40 modal-backdrop z-40" onClick={onClose} />
 
       {/* Panel — full screen on mobile, right drawer on sm+ */}
       <div
