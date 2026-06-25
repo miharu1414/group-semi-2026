@@ -19,6 +19,7 @@ It records the current stack, runtime assumptions, source-of-truth files, requir
 ## Non-Negotiable Rules
 
 - Do not commit or push without explicit user instruction. (This applies to the immediate user prompt for each turn; never perform commits/pushes automatically based on past prompts).
+- **Branch Synchronization Rule**: Every time before starting work or after merging pull requests, developers and AI agents must pull the latest changes on `main` and sync local `develop` and `main` branches by running `git fetch origin` followed by `git checkout <branch> && git rebase origin/main` to prevent branch drift.
 - Do not run npm run build while the dev server is running.
 - Use `npm run dev` for local hot reload.
 - When implementing a feature or changing project operations, add a memo under `docs/memo` named `YYYY-MM-DD-kebab-case-summary.md`.
