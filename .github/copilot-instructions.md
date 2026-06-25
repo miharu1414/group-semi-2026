@@ -21,7 +21,7 @@ Group Seminar Calendar 2026 is a Next.js 14 + TypeScript + Tailwind CSS app back
 - Keep Firebase credentials in `.env.local` or deployment secrets.
 - Do not commit `.env.local`, Firebase service account JSON, or private keys.
 - Do not restore deprecated database or setup assumptions.
-- Do not commit or push without explicit user instruction.
+- Do not commit or push without explicit user instruction. (This applies to the immediate user prompt for each turn; never perform commits/pushes automatically based on past prompts).
 - Do not run npm run build while the dev server is running.
 - When implementing a feature or changing project operations, add a memo under `docs/memo` named `YYYY-MM-DD-kebab-case-summary.md`.
 - Challenge user proposals and document tradeoffs.
