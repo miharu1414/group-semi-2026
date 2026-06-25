@@ -81,7 +81,7 @@ export default function NoticeBoard() {
         </h2>
         <button
           onClick={() => { setAdding(true); setEditingId(null); }}
-          className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-2 py-1 rounded-lg transition-colors"
+          className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 active:bg-indigo-100 px-2 py-2 sm:py-1 rounded-lg transition-colors touch-manipulation"
         >
           <Plus size={13} />
           追加
@@ -102,7 +102,7 @@ export default function NoticeBoard() {
                 if (e.key === 'Escape') { setAdding(false); setNewText(''); }
               }}
               rows={2}
-              placeholder="メモ・連絡事項を入力（Cmd+Enter で保存）"
+              placeholder="メモ・連絡事項を入力（Ctrl/Cmd+Enter で保存）"
               className="flex-1 rounded-lg border border-indigo-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none placeholder-gray-300 bg-white"
             />
             <div className="flex flex-col gap-1">

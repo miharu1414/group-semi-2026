@@ -31,7 +31,7 @@ export default function DayDetailModal({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/40 modal-backdrop z-40 animate-fade-in-up"
+        className="fixed inset-0 bg-black/40 modal-backdrop z-40"
         onClick={onClose}
       />
 
@@ -43,7 +43,7 @@ export default function DayDetailModal({
         onClick={onClose}
       >
         <div
-          className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md max-h-[88dvh] sm:max-h-[75vh] flex flex-col animate-fade-in-up"
+          className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md max-h-[92dvh] sm:max-h-[75vh] flex flex-col animate-fade-in-up"
           onClick={(e) => e.stopPropagation()}
           role="dialog"
           aria-modal="true"

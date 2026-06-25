@@ -187,12 +187,10 @@ export default function CalendarView({
                   )}
                 </div>
 
-                {/* Quick-add button:
-                    Mobile — always visible (no hover available)
-                    Desktop — appears on hover only */}
+                {/* Quick-add button: desktop hover only (tap-day flow handles mobile) */}
                 {isCurrentMonth && (
                   <button
-                    className={`transition-opacity w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-indigo-100 hover:bg-indigo-200 active:bg-indigo-300 text-indigo-600 flex items-center justify-center text-sm leading-none shrink-0 touch-manipulation focus-visible:opacity-100 ${isHovered ? '' : 'sm:opacity-0'}`}
+                    className={`hidden sm:flex transition-opacity w-6 h-6 rounded-full bg-indigo-100 hover:bg-indigo-200 active:bg-indigo-300 text-indigo-600 items-center justify-center text-sm leading-none shrink-0 focus-visible:opacity-100 ${isHovered ? '' : 'sm:opacity-0'}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       onQuickAdd(dateStr);
@@ -206,21 +204,18 @@ export default function CalendarView({
               </div>
 
               {/* Seminar Events
-                  Mobile  → compact colored dots (tap cell to see details)
+                  Mobile  → thin segmented color bar at cell bottom (tap to see details)
                   Desktop → full SeminarCards with hover popup */}
 
-              {/* Mobile: colored dots */}
-              {daySeminars.length > 0 && (
-                <div className="sm:hidden flex items-center gap-[3px] px-1 pb-1 mt-0.5 flex-wrap">
+              {/* Mobile: segmented color bar (one segment per event type, up to 4) */}
+              {isCurrentMonth && daySeminars.length > 0 && (
+                <div className="sm:hidden absolute bottom-0 inset-x-0 h-[3px] flex overflow-hidden">
                   {daySeminars.slice(0, 4).map((s) => (
-                    <span
+                    <div
                       key={s.id}
-                      className={`w-1.5 h-1.5 rounded-full shrink-0 ${SEMINAR_TYPES[s.type]?.dotClass ?? 'bg-gray-400'}`}
+                      className={`flex-1 h-full ${SEMINAR_TYPES[s.type]?.dotClass ?? 'bg-gray-400'}`}
                     />
                   ))}
-                  {daySeminars.length > 4 && (
-                    <span className="text-[8px] text-gray-400 leading-none">+{daySeminars.length - 4}</span>
-                  )}
                 </div>
               )}
 

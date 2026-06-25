@@ -21,7 +21,7 @@ export default function InfoModal({ open, onClose }: Props) {
         onClick={onClose}
       >
         <div
-          className="bg-white w-full sm:max-w-2xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[92dvh] sm:max-h-[85vh] rounded-t-2xl"
+          className="bg-white w-full sm:max-w-2xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[92dvh] sm:max-h-[85vh] rounded-t-3xl animate-fade-in-up"
           onClick={(e) => e.stopPropagation()}
           role="dialog"
           aria-modal="true"
@@ -47,7 +47,7 @@ export default function InfoModal({ open, onClose }: Props) {
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-2.5 sm:p-2 rounded-lg hover:bg-gray-100 active:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors touch-manipulation"
               aria-label="閉じる"
             >
               <X size={18} />

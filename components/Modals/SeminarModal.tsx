@@ -152,7 +152,7 @@ export default function SeminarModal({
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+            className="p-2.5 sm:p-2 rounded-lg hover:bg-gray-100 active:bg-gray-200 text-gray-500 transition-colors touch-manipulation"
             aria-label="閉じる"
           >
             <X size={18} />
