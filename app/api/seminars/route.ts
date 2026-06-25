@@ -1,6 +1,10 @@
 import { db } from '@/lib/firebase-admin';
 import { normalizeAssigneeB } from '@/lib/types';
 
+const VALID_SEMINAR_TYPES = ['rinudoku', 'zentai', 'kenkyu', 'other'] as const;
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -46,8 +50,17 @@ export async function POST(request: Request) {
       notes?: string;
     };
 
-    if (!body.date || !body.type) {
-      return Response.json({ error: 'date and type are required' }, { status: 400 });
+    if (!body.date || !DATE_RE.test(body.date)) {
+      return Response.json({ error: 'valid date (YYYY-MM-DD) is required' }, { status: 400 });
+    }
+    if (!body.type || !VALID_SEMINAR_TYPES.includes(body.type as typeof VALID_SEMINAR_TYPES[number])) {
+      return Response.json({ error: `type must be one of: ${VALID_SEMINAR_TYPES.join(', ')}` }, { status: 400 });
+    }
+    if (body.start_time && !TIME_RE.test(body.start_time)) {
+      return Response.json({ error: 'start_time must be HH:MM' }, { status: 400 });
+    }
+    if (body.end_time && !TIME_RE.test(body.end_time)) {
+      return Response.json({ error: 'end_time must be HH:MM' }, { status: 400 });
     }
 
     const now = new Date().toISOString();

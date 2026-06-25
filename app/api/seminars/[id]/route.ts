@@ -1,6 +1,10 @@
 import { db } from '@/lib/firebase-admin';
 import { normalizeAssigneeB } from '@/lib/types';
 
+const VALID_SEMINAR_TYPES = ['rinudoku', 'zentai', 'kenkyu', 'other'] as const;
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
 export async function GET(
   _request: Request,
   { params }: { params: { id: string } }
@@ -46,6 +50,19 @@ export async function PUT(
       assignee_c?: string;
       notes?: string;
     };
+
+    if (body.date !== undefined && !DATE_RE.test(body.date)) {
+      return Response.json({ error: 'valid date (YYYY-MM-DD) is required' }, { status: 400 });
+    }
+    if (body.type !== undefined && !VALID_SEMINAR_TYPES.includes(body.type as typeof VALID_SEMINAR_TYPES[number])) {
+      return Response.json({ error: `type must be one of: ${VALID_SEMINAR_TYPES.join(', ')}` }, { status: 400 });
+    }
+    if (body.start_time && !TIME_RE.test(body.start_time)) {
+      return Response.json({ error: 'start_time must be HH:MM' }, { status: 400 });
+    }
+    if (body.end_time && !TIME_RE.test(body.end_time)) {
+      return Response.json({ error: 'end_time must be HH:MM' }, { status: 400 });
+    }
 
     const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
     if (body.date         !== undefined) updates.date         = body.date;

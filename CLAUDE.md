@@ -61,6 +61,7 @@ sleep 8 && curl -s -o /dev/null -w "%{http_code}" http://localhost:3000
 **Rules:**
 - Always restart after `npm install` — new `node_modules` require a fresh server.
 - Always restart after a session gap — the background process may have died.
+- **`npm run build` kills the dev server.** Always restart after running a build.
 - After restarting, tell the user to hard-refresh the browser: **Cmd+Shift+R** (Mac) / **Ctrl+Shift+R** (Windows).
 - If the page renders without CSS (plain text, no layout), that is a dead/stale server. Restart first before investigating code.
 - After a restart, confirm the server is healthy (HTTP 200) before reporting the task done.
@@ -70,5 +71,10 @@ sleep 8 && curl -s -o /dev/null -w "%{http_code}" http://localhost:3000
 1. Run the narrowest relevant check.
 2. Run `npm run docs:check` when documentation or architecture assumptions changed.
 3. Run `npm run build` when API, shared types, or config changed.
-4. Confirm no secret values were added to tracked files.
-5. Confirm the dev server is running and returns HTTP 200.
+4. **If `npm run build` was executed for any reason, always restart the dev server afterward.**
+5. Confirm no secret values were added to tracked files.
+6. Confirm the dev server is running and returns HTTP 200.
+7. **Visually verify the app renders correctly before commit/push.**
+   - Check http://localhost:3000 renders with full CSS (not plain text).
+   - If any CSS/layout changes were made, confirm the calendar grid, header, modals, and NoticeBoard appear styled.
+   - If the page renders as unstyled plain text: restart the dev server, then hard-refresh.
