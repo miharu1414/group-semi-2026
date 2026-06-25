@@ -44,15 +44,19 @@ function getRoleRows(seminars: Seminar[], name: string): Row[] {
   return rows.sort((a, b) => a.seminar.date.localeCompare(b.seminar.date));
 }
 
+const TODAY = new Date().toISOString().slice(0, 10);
+
 export default function MemberScheduleModal({ open, members, onClose }: Props) {
   const [selected, setSelected] = useState('');
   const [allSeminars, setAllSeminars] = useState<Seminar[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showPast, setShowPast] = useState(false);
 
   // 開閉に合わせてデータ取得・state リセット
   useEffect(() => {
     if (!open) {
       setSelected('');
+      setShowPast(false);
       return;
     }
     setLoading(true);
@@ -71,9 +75,11 @@ export default function MemberScheduleModal({ open, members, onClose }: Props) {
 
   if (!open) return null;
 
-  const rows = selected ? getRoleRows(allSeminars, selected) : [];
+  const allRows = selected ? getRoleRows(allSeminars, selected) : [];
+  const rows = showPast ? allRows : allRows.filter((r) => r.seminar.date >= TODAY);
+  const pastCount = allRows.length - rows.length;
 
-  // 役割ごとの集計（RL を参照して CURRENT_ACTIVITY 変更に追随）
+  // 役割ごとの集計（表示中の rows を対象にする）
   const counts = { A: 0, B: 0, C: 0 };
   rows.forEach((r) => {
     if (r.role === RL.a) counts.A++;
@@ -159,6 +165,24 @@ export default function MemberScheduleModal({ open, members, onClose }: Props) {
             </div>
           )}
 
+          {/* Past toggle */}
+          {selected && !loading && (
+            <div className="px-5 pb-2 shrink-0">
+              <button
+                onClick={() => setShowPast((v) => !v)}
+                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                  showPast
+                    ? 'bg-gray-800 text-white border-gray-800'
+                    : 'bg-white text-gray-500 border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                {showPast
+                  ? '過去を含めて表示中'
+                  : `今日以降を表示${pastCount > 0 ? `（過去 ${pastCount} 件を非表示）` : ''}`}
+              </button>
+            </div>
+          )}
+
           {/* Table */}
           <div className="flex-1 overflow-auto px-5 pb-5">
             {loading ? (
@@ -173,7 +197,7 @@ export default function MemberScheduleModal({ open, members, onClose }: Props) {
             ) : rows.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 gap-2 text-gray-400">
                 <CalendarDays size={32} className="opacity-30" />
-                <p className="text-sm">{selected} の担当予定はありません</p>
+                <p className="text-sm">{selected} の{showPast ? '担当予定はありません' : '今後の担当予定はありません'}</p>
               </div>
             ) : (
               <div className="overflow-x-auto -mx-1">
