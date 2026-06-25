@@ -41,12 +41,25 @@ export default function CalendarApp() {
 
   const monthKey = format(currentMonth, 'yyyy-MM');
 
+  const prevMonth = new Date(currentMonth);
+  prevMonth.setMonth(prevMonth.getMonth() - 1);
+  const prevMonthKey = format(prevMonth, 'yyyy-MM');
+
+  const nextMonth = new Date(currentMonth);
+  nextMonth.setMonth(nextMonth.getMonth() + 1);
+  const nextMonthKey = format(nextMonth, 'yyyy-MM');
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     setFetchError(false);
     try {
-      const [sems, mems] = await Promise.all([getSeminars(monthKey), getMembers()]);
-      setSeminars(sortSeminars(sems));
+      const [semsCur, semsPrev, semsNext, mems] = await Promise.all([
+        getSeminars(monthKey),
+        getSeminars(prevMonthKey),
+        getSeminars(nextMonthKey),
+        getMembers(),
+      ]);
+      setSeminars(sortSeminars([...semsCur, ...semsPrev, ...semsNext]));
       setMembers(mems);
     } catch (e) {
       console.error(e);
@@ -54,7 +67,7 @@ export default function CalendarApp() {
     } finally {
       setLoading(false);
     }
-  }, [monthKey]);
+  }, [monthKey, prevMonthKey, nextMonthKey]);
 
   useEffect(() => {
     fetchData();
@@ -122,17 +135,20 @@ export default function CalendarApp() {
   const handleSeminarSave = async (data: SeminarFormData) => {
     setSavingError(null);
     try {
+      const isVisibleDate = (date: string) =>
+        date.startsWith(monthKey) || date.startsWith(prevMonthKey) || date.startsWith(nextMonthKey);
+
       if (editingSeminar) {
         const updated = await updateSeminar(editingSeminar.id, data);
         setSeminars((prev) => {
-          const next = updated.date.startsWith(monthKey)
+          const next = isVisibleDate(updated.date)
             ? prev.map((s) => (s.id === updated.id ? updated : s))
             : prev.filter((s) => s.id !== updated.id);
           return sortSeminars(next);
         });
       } else {
         const created = await createSeminar(data);
-        if (created.date.startsWith(monthKey)) {
+        if (isVisibleDate(created.date)) {
           setSeminars((prev) => sortSeminars([...prev, created]));
         }
       }
