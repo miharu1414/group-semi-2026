@@ -5,10 +5,11 @@ import { getEventConfig } from '@/lib/activity-config';
 
 interface Props {
   seminar: Seminar;
-  onClick: (e: React.MouseEvent) => void;
+  onClick?: (e: React.MouseEvent) => void;
+  disabled?: boolean;
 }
 
-export default function SeminarCard({ seminar, onClick }: Props) {
+export default function SeminarCard({ seminar, onClick, disabled }: Props) {
   const cfg = getEventConfig(seminar);
   const bNames = normalizeAssigneeB(seminar.assignee_b);
   const hasAssignees = seminar.assignee_a || bNames.length > 0 || seminar.assignee_c;
@@ -16,18 +17,10 @@ export default function SeminarCard({ seminar, onClick }: Props) {
     ? (seminar.custom_label || 'その他')
     : cfg.shortLabel;
 
-  return (
-    <button
-      onClick={onClick}
-      className={`
-        w-full text-left rounded-md px-1.5 py-1 border text-xs
-        ${cfg.bgClass} ${cfg.textClass} ${cfg.borderClass} ${cfg.hoverClass}
-        transition-all duration-150 group/card
-        hover:shadow-sm active:scale-95
-      `}
-    >
+  const cardContent = (
+    <>
       <div className="flex items-center gap-1 min-w-0">
-        <span className={`w-1.5 h-1.5 rounded-full ${cfg.dotClass} shrink-0`} />
+        <span className={`w-1.5 h-1.5 rounded-full ${disabled ? 'bg-gray-300' : cfg.dotClass} shrink-0`} />
         <span className="font-semibold truncate">{displayLabel}</span>
         {seminar.title && (
           <span className="text-xs opacity-70 truncate hidden sm:inline">
@@ -59,6 +52,34 @@ export default function SeminarCard({ seminar, onClick }: Props) {
           )}
         </div>
       )}
+    </>
+  );
+
+  if (disabled) {
+    return (
+      <div
+        className="
+          w-full text-left rounded-md px-1.5 py-1 border text-xs
+          bg-gray-100/50 text-gray-400 border-gray-200/60 opacity-60
+          transition-all duration-150 select-none
+        "
+      >
+        {cardContent}
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={onClick}
+      className={`
+        w-full text-left rounded-md px-1.5 py-1 border text-xs
+        ${cfg.bgClass} ${cfg.textClass} ${cfg.borderClass} ${cfg.hoverClass}
+        transition-all duration-150 group/card
+        hover:shadow-sm active:scale-95
+      `}
+    >
+      {cardContent}
     </button>
   );
 }
